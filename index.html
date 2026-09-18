@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Petugas SOSKEM - Jami Al-Ikhlash</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        :root {
+            --primary-dark: #0f2c23;
+            --primary-emerald: #134e38;
+            --accent-gold: #d4af37;
+            --bg-native: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-main: #2b3a35;
+            --border-color: #e2e8f0;
+        }
+
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        body { background-color: var(--bg-native); color: var(--text-main); padding-bottom: 80px; }
+        
+        /* TOP APP BAR & RUNNING TEXT */
+        .app-bar {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-emerald) 100%);
+            color: white; padding: 12px 16px;
+            box-shadow: 0 4px 12px rgba(15, 44, 35, 0.15); position: sticky; top: 0; z-index: 100; border-bottom: 3px solid var(--accent-gold);
+        }
+        .app-bar-top-row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+        .app-bar-logo { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent-gold); background: #fff; flex-shrink: 0; }
+        .app-bar-title h1 { font-size: 14px; font-weight: 700; letter-spacing: 0.5px; }
+        .app-bar-title p { font-size: 10px; color: #f3e5ab; }
+        
+        .running-text-container { background: rgba(0,0,0,0.2); overflow: hidden; white-space: nowrap; border-radius: 4px; padding: 3px 0; font-size: 11px; color: #f3e5ab; font-weight: 600; }
+        .running-text-container span { display: inline-block; padding-left: 100%; animation: jalanHalus 26s linear infinite; }
+        @keyframes jalanHalus { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
+
+        .sync-panel { background: #fffdf0; border: 1px solid #f9e8a2; padding: 10px 14px; border-radius: 12px; margin: 15px 0; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
+        .sync-header { font-size: 11px; font-weight: 600; color: #8a6d0b; display: flex; justify-content: space-between; align-items: center; }
+        .btn-group { display: flex; gap: 6px; width: 100%; }
+        .btn-sync { flex: 1; padding: 8px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 11px; color: white; display: flex; align-items: center; justify-content: center; gap: 4px;}
+        .btn-tarik { background-color: #0284c7; } 
+        .btn-kirim { background-color: #059669; }
+
+        .container { width: 100%; max-width: 600px; margin: 0 auto; padding: 0 15px; margin-top: 15px; }
+        .card-native { background: var(--card-bg); border-radius: 14px; padding: 18px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); border: 1px solid var(--border-color); }
+        .card-native h3 { font-size: 13px; color: var(--primary-dark); margin-bottom: 12px; font-weight: 700; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; }
+
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 700; font-size: 12px; color: #334155; }
+        .form-control { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; background: #fff; }
+        .form-control:focus { outline: none; border-color: var(--primary-emerald); box-shadow: 0 0 0 3px rgba(19, 78, 56, 0.1); }
+        .form-row-prefix { display: flex; gap: 5px; }
+        .prefix-addon { background: #e2e8f0; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-weight: bold; color: #334155; font-size: 13px; display: flex; align-items: center; }
+
+        .btn-native { width: 100%; padding: 12px; background: var(--primary-emerald); color: #fff; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 14px; transition: 0.2s; }
+        .btn-action-sm { padding: 6px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; border: none; color: white; background: #0284c7;}
+
+        .signature-box { width: 100%; height: 130px; border: 2px dashed #cbd5e1; border-radius: 8px; background: #fafafa; display: block; touch-action: none; cursor: crosshair; }
+        .log-item { background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px; border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .log-info h4 { font-size: 13px; color: var(--primary-dark); margin-bottom: 2px; }
+        .log-info p { font-size: 10px; color: #64748b; }
+        .btn-hapus { background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: bold; }
+
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: #ffffff; display: flex; border-top: 1px solid var(--border-color); box-shadow: 0 -4px 15px rgba(0,0,0,0.06); z-index: 999; height: 65px; }
+        .nav-item { flex: 1; background: none; border: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; cursor: pointer; color: #64748b; font-size: 11px; font-weight: 600; transition: 0.2s; }
+        .nav-item span.icon { font-size: 20px; }
+        .nav-item.active { color: var(--primary-emerald); }
+        .nav-item.active span.icon { transform: scale(1.1); }
+        
+        .tab-content { display: none; animation: fadeIn 0.2s ease-in-out; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center; padding: 15px; }
+        .modal-content { background-color: #fff; padding: 20px; border-radius: 14px; width: 100%; max-width: 400px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .modal-header { font-size: 14px; font-weight: bold; margin-bottom: 12px; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px; color: var(--primary-dark); display: flex; justify-content: space-between;}
+    </style>
+</head>
+<body>
+
+<!-- TOP APP BAR DENGAN LOGO DAN RUNNING TEXT -->
+<div class="app-bar">
+    <div class="app-bar-top-row">
+        <img src="logo.png" alt="Logo Masjid" class="app-bar-logo" onerror="this.style.display='none'">
+        <div class="app-bar-title">
+            <h1>Form Petugas SOSKEM</h1>
+            <p>Idarah Sosial Kematian Terintegrasi</p>
+        </div>
+    </div>
+    <div class="running-text-container">
+        <span>Sistem Administrasi Sosial Kematian Masjid Jami Al-Ikhlash • RW 18, RW 19, RW 20 • Secure by AD3R SOFTWARE ,Build 2026</span>
+    </div>
+</div>
+
+<div class="container">
+    <!-- TAB 1: TAGIHAN IURAN -->
+    <div id="tab-tagihan" class="tab-content active">
+        <div class="sync-panel">
+            <div class="sync-header"><span>🔄 Sinkronisasi Pusat</span><span id="status-master" style="color: #dc2626;">❌ Warga: Kosong</span></div>
+            <div class="btn-group">
+                <button class="btn-sync btn-tarik" onclick="pemicuImporMaster()">📥 1. Tarik Data</button>
+                <button class="btn-sync btn-kirim" onclick="eksporSetoranLapangan()">📤 2. Kirim Laporan</button>
+                <input type="file" id="input-file-master" accept=".json" style="display: none;" onchange="prosesImporMaster(event)">
+            </div>
+        </div>
+
+        <div class="card-native">
+            <h3>💰 Input Setoran Warga</h3>
+            <form id="form-petugas">
+                <div class="form-group">
+                    <label>Pilih Wilayah (RW)</label>
+                    <select id="ptg-rw" class="form-control" onchange="sinkronisasiPrefixSetoran()" required>
+                        <option value="RW 18">RW 18</option><option value="RW 19">RW 19</option><option value="RW 20">RW 20</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Kode Buku Warga</label>
+                    <div class="form-row-prefix">
+                        <span id="label-prefix-setor" class="prefix-addon">ISK18/</span>
+                        <input type="text" id="ptg-kode" class="form-control" placeholder="004" required style="text-transform: uppercase;" oninput="cekPreviewKK()">
+                        <button type="button" class="btn-action-sm" style="padding: 0 14px; background-color: var(--primary-dark);" onclick="bukaModalCariKode()">🔍 Cari</button>
+                    </div>
+                    <div id="preview-kk" style="font-size: 11px; margin-top: 4px; font-weight: 600;"></div>
+                </div>
+
+                <div class="form-group" style="display: flex; gap: 8px;">
+                    <div style="flex: 1;"><label>Tanggal</label><input type="date" id="ptg-tanggal" class="form-control" required></div>
+                    <div style="flex: 1;"><label>Periode</label>
+                        <select id="ptg-periode" class="form-control" required>
+                            <option value="Triwulan 1 (Jan-Mar)">Triwulan 1</option><option value="Triwulan 2 (Apr-Jun)">Triwulan 2</option>
+                            <option value="Triwulan 3 (Jul-Sep)">Triwulan 3</option><option value="Triwulan 4 (Okt-Des)">Triwulan 4</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group"><label>Uang Diterima (Rp)</label><input type="text" id="ptg-nominal" class="form-control" value="Rp 25.000" onkeyup="this.value = formatRupiahKetik(this.value, 'Rp ')" required style="font-weight:bold; color:var(--primary-dark); font-size: 16px;"></div>
+                <div class="form-group">
+                    <label>Tanda Tangan Penyetor</label>
+                    <canvas id="signatureCanvas" class="signature-box" width="500" height="130"></canvas>
+                    <input type="hidden" id="signatureInput" />
+                    <button type="button" onclick="bersihkanTandaTangan()" style="margin-top:6px; padding:6px 10px; font-size:10px; background:#e2e8f0; border:none; border-radius:6px; font-weight:bold; color:#475569;">🧹 Hapus Tanda Tangan</button>
+                </div>
+                <button type="submit" class="btn-native">💾 Simpan Setoran</button>
+            </form>
+        </div>
+
+        <div class="card-native">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px;">
+                <h3 style="margin: 0; border: none; padding: 0;">📋 Hasil Tagihan Hari Ini</h3>
+                <span style="font-size: 12px; font-weight: bold; color: var(--primary-emerald);" id="total-uang-hari-ini">Rp 0</span>
+            </div>
+            <div id="list-setoran-lapangan"></div>
+        </div>
+    </div>
+
+    <!-- TAB 2: DATA WARGA -->
+    <div id="tab-warga" class="tab-content">
+        <div class="card-native">
+            <h3>📝 Registrasi Warga Baru (Di Lapangan)</h3>
+            <form id="form-master-lokal">
+                <div class="form-group" style="display: flex; gap: 8px;">
+                    <div style="flex: 1;"><label>RW</label><select id="lokal-rw" class="form-control" required onchange="generateKodeBukuLokal()"><option value="RW 18">RW 18</option><option value="RW 19">RW 19</option><option value="RW 20">RW 20</option></select></div>
+                    <div style="flex: 1;"><label>RT</label><select id="lokal-rt" class="form-control" required onchange="generateKodeBukuLokal()"><option value="01">RT 01</option><option value="02">RT 02</option><option value="03">RT 03</option><option value="04">RT 04</option><option value="05">RT 05</option><option value="06">RT 06</option><option value="07">RT 07</option><option value="08">RT 08</option><option value="09">RT 09</option><option value="10">RT 10</option></select></div>
+                </div>
+                <div class="form-group"><label>Kode Buku (Otomatis)</label><input type="text" id="lokal-kode" class="form-control" readonly style="background:#f1f5f9; font-weight:bold;"></div>
+                <div class="form-group"><label>Nama Kepala Keluarga</label><input type="text" id="lokal-nama" class="form-control" placeholder="Nama..." required></div>
+                <div class="form-group"><label>Nomor WhatsApp</label><input type="text" id="lokal-wa" class="form-control" placeholder="Contoh: 081234..."></div>
+                <div class="form-group"><label>No. KK (16 Digit)</label><input type="text" id="lokal-kk" class="form-control" placeholder="Bisa disusul jika blm ada..." maxlength="16"></div>
+                <button type="submit" class="btn-native" style="background: var(--primary-dark); padding: 10px; font-size: 12px;">Daftarkan Warga</button>
+            </form>
+        </div>
+
+        <div class="card-native">
+            <h3 style="display: flex; justify-content: space-between;"><span>👥 Data Warga Lokal</span><span id="badge-jml-warga" style="font-size:10px; background:#e2e8f0; padding:2px 6px; border-radius:4px;">0 KK</span></h3>
+            <input type="text" id="cari-warga-lokal" class="form-control" placeholder="🔍 Cari Kode / No KK..." onkeyup="renderListWargaLokal()" style="margin-bottom: 10px; font-size: 11px; padding: 8px;">
+            <div id="list-warga-lokal" style="display: flex; flex-direction: column; gap: 8px;"></div>
+        </div>
+    </div>
+</div>
+
+<nav class="bottom-nav">
+    <button class="nav-item active" onclick="pindahTabLokal(0, this)"><span class="icon">💰</span><span>Tagihan</span></button>
+    <button class="nav-item" onclick="pindahTabLokal(1, this)"><span class="icon">👥</span><span>Data Warga</span></button>
+</nav>
+
+<!-- MODAL CARI KODE/KK -->
+<div id="modalCariKode" class="modal">
+    <div class="modal-content" style="padding: 15px;">
+        <div class="modal-header"><span>🔍 Cari Kode Buku / KK</span><span onclick="tutupModalCariKode()" style="color:#dc2626; cursor:pointer;">✖</span></div>
+        <input type="text" id="input-cari-modal" class="form-control" placeholder="Ketik angka kode (misal 015) atau No KK..." onkeyup="renderListCariKode()" style="margin-bottom:12px;">
+        <div id="list-hasil-cari" style="max-height: 300px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px;"></div>
+    </div>
+</div>
+
+<!-- MODAL EDIT WARGA -->
+<div id="modalEditWarga" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">Lengkapi Data Warga</div>
+        <div class="form-group"><label id="modal-lbl-kode">Kode Buku: -</label></div>
+        <div class="form-group"><label>RT</label><select id="modal-inp-rt" class="form-control"><option value="01">RT 01</option><option value="02">RT 02</option><option value="03">RT 03</option><option value="04">RT 04</option><option value="05">RT 05</option><option value="06">RT 06</option><option value="07">RT 07</option><option value="08">RT 08</option><option value="09">RT 09</option><option value="10">RT 10</option></select></div>
+        <div class="form-group"><label>Nama Kepala Keluarga</label><input type="text" id="modal-inp-nama" class="form-control"></div>
+        <div class="form-group"><label>Nomor WA</label><input type="text" id="modal-inp-wa" class="form-control"></div>
+        <div class="form-group"><label>No. KK</label><input type="text" id="modal-inp-kk" class="form-control" maxlength="16"></div>
+        <div class="modal-footer">
+            <button class="btn-action-sm" onclick="tutupModalWarga()" style="background:#cbd5e1; color:#334155;">Batal</button>
+            <button class="btn-action-sm" onclick="simpanPembaruanWarga()" style="background:#059669;">Simpan</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const TARIF_PER_TRIWULAN = 25000;
+    const NOMOR_WA_ADMIN = "6288226165425"; 
+    
+    let masterKKLokal = JSON.parse(localStorage.getItem('soskem_petugas_master')) || [];
+    let setoranHariIni = JSON.parse(localStorage.getItem('soskem_petugas_iuran')) || [];
+    let indexEditLokal = null;
+
+    document.addEventListener("DOMContentLoaded", function() {
+        document.getElementById('ptg-tanggal').value = new Date().toISOString().split('T')[0];
+        setelDropdownTriwulanOtomatis();
+        sinkronisasiPrefixSetoran();
+        setupSignaturePad();
+        perbaruiStatusMaster();
+        renderLogSetoran();
+        generateKodeBukuLokal();
+        renderListWargaLokal();
+    });
+
+    function pindahTabLokal(indexTab, elBtn) {
+        const listTabID = ['tab-tagihan', 'tab-warga'];
+        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
+        document.getElementById(listTabID[indexTab]).classList.add('active');
+        elBtn.classList.add('active'); window.scrollTo(0, 0);
+        if(indexTab === 0) setupSignaturePad();
+    }
+
+    function formatRupiahKetik(angka, prefix) {
+        let number_string = angka.replace(/[^,\d]/g, '').toString(), split = number_string.split(','), sisa = split[0].length % 3,
+            rupiah = split[0].substr(0, sisa), ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+        if (ribuan) { let separator = sisa ? '.' : ''; rupiah += separator + ribuan.join('.'); }
+        return rupiah ? 'Rp ' + rupiah : '';
+    }
+    function bersihkanFormatRupiah(rupiahString) { return parseInt(rupiahString.replace(/[^0-9]/g, ''), 10) || 0; }
+    
+    function setelDropdownTriwulanOtomatis() {
+        const bln = new Date().getMonth() + 1;
+        let targetValue = "Triwulan 1 (Jan-Mar)";
+        if (bln >= 4 && bln <= 6) targetValue = "Triwulan 2 (Apr-Jun)";
+        else if (bln >= 7 && bln <= 9) targetValue = "Triwulan 3 (Jul-Sep)";
+        else if (bln >= 10 && bln <= 12) targetValue = "Triwulan 4 (Okt-Des)";
+        document.getElementById('ptg-periode').value = targetValue;
+    }
+
+    function sinkronisasiPrefixSetoran() {
+        const rw = document.getElementById('ptg-rw').value.replace(/\D/g, '');
+        document.getElementById('label-prefix-setor').innerText = `ISK${rw}/`;
+        cekPreviewKK();
+    }
+
+    function cekPreviewKK() {
+        const inputVal = document.getElementById('ptg-kode').value.trim().toUpperCase();
+        const previewEl = document.getElementById('preview-kk');
+        if (inputVal === '') { previewEl.innerHTML = ''; return; }
+        const rw = document.getElementById('ptg-rw').value.replace(/\D/g, '');
+        const jemaah = masterKKLokal.find(item => {
+            if (!item.kode) return false;
+            let kodeBersih = item.kode.toUpperCase();
+            let targetLengkap = `ISK${rw}/${inputVal}`;
+            if (kodeBersih === targetLengkap || kodeBersih.includes(`/${inputVal}-`)) return true;
+            return false;
+        });
+        if (jemaah) {
+            let nTampil = jemaah.nama && !jemaah.nama.startsWith("Keluarga ISK") ? jemaah.nama : ("Keluarga " + jemaah.kode);
+            previewEl.style.color = '#059669'; previewEl.innerHTML = `✅ <b style="font-size:13px;">${nTampil}</b> (${jemaah.kode})`;
+        } else {
+            previewEl.style.color = '#dc2626'; previewEl.innerHTML = `❌ Kode belum terdaftar.`;
+        }
+    }
+
+    function perbaruiStatusMaster() {
+        const el = document.getElementById('status-master');
+        document.getElementById('badge-jml-warga').innerText = `${masterKKLokal.length} KK`;
+        if (masterKKLokal.length > 0) { el.innerText = `✅ Warga: ${masterKKLokal.length} Data`; el.style.color = '#166534'; } 
+        else { el.innerText = `❌ Warga: Kosong`; el.style.color = '#dc2626'; }
+    }
+
+    // MODAL CARI KODE
+    function bukaModalCariKode() {
+        if(masterKKLokal.length === 0) { Swal.fire('Data Kosong', 'Tarik data dari Admin terlebih dahulu.', 'warning'); return; }
+        document.getElementById('modalCariKode').style.display = 'flex';
+        document.getElementById('input-cari-modal').value = '';
+        renderListCariKode();
+    }
+    function tutupModalCariKode() { document.getElementById('modalCariKode').style.display = 'none'; }
+    function renderListCariKode() {
+        const rwTarget = document.getElementById('ptg-rw').value;
+        const kataKunci = document.getElementById('input-cari-modal').value.toUpperCase();
+        const wadah = document.getElementById('list-hasil-cari');
+        wadah.innerHTML = '';
+        
+        let filterData = masterKKLokal.filter(w => w.rw === rwTarget);
+        if(kataKunci !== "") {
+            filterData = filterData.filter(w => w.kode.toUpperCase().includes(kataKunci) || w.nomor.includes(kataKunci));
+        }
+
+        let count = 0;
+        filterData.forEach(w => {
+            if(count >= 30) return;
+            let subKode = w.kode.split('/')[1];
+            wadah.innerHTML += `
+                <div style="padding:10px; border:1px solid #e2e8f0; border-radius:8px; display:flex; justify-content:space-between; align-items:center; background:#f8fafc;">
+                    <div>
+                        <div style="font-weight:bold; font-size:14px; color:var(--primary-dark);">${w.kode}</div>
+                        <div style="font-size:10px; color:#64748b; margin-top:2px;">No. KK: ${w.nomor.includes("000000") ? "-" : w.nomor}</div>
+                    </div>
+                    <button type="button" class="btn-action-sm" style="background:#059669; padding:6px 12px; height:auto;" onclick="pilihDariModal('${subKode}')">Pilih</button>
+                </div>
+            `;
+            count++;
+        });
+        if(count === 0) wadah.innerHTML = `<div style="text-align:center; color:#dc2626; font-size:11px;">Tidak ditemukan di ${rwTarget}</div>`;
+    }
+    function pilihDariModal(subKode) {
+        document.getElementById('ptg-kode').value = subKode;
+        tutupModalCariKode();
+        cekPreviewKK();
+    }
+
+    // REGISTRASI LOKAL & EDIT
+    function generateKodeBukuLokal() {
+        const rwTerpilih = document.getElementById('lokal-rw').value;
+        const rtTerpilih = document.getElementById('lokal-rt').value;
+        const prefixTarget = `ISK${rwTerpilih.replace(/\D/g, '')}/`;
+        let noMax = 0;
+        masterKKLokal.forEach(item => {
+            if (item.kode && item.kode.toUpperCase().startsWith(prefixTarget)) {
+                let bag = item.kode.split('/')[1];
+                if (bag) { let num = parseInt(bag.split('-')[0], 10); if (!isNaN(num) && num > noMax) noMax = num; }
+            }
+        });
+        document.getElementById('lokal-kode').value = `${prefixTarget}${String(noMax + 1).padStart(3, '0')}-${rtTerpilih}`;
+    }
+
+    document.getElementById('form-master-lokal').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const kode = document.getElementById('lokal-kode').value.trim().toUpperCase();
+        const rt = document.getElementById('lokal-rt').value;
+        const nama = document.getElementById('lokal-nama').value.trim();
+        const wa = document.getElementById('lokal-wa').value.trim();
+        const nomor = document.getElementById('lokal-kk').value.trim() || "0000000000000000";
+        const rw = document.getElementById('lokal-rw').value;
+        if (masterKKLokal.some(item => item.kode === kode)) { Swal.fire('Error', 'Kode sudah terpakai', 'error'); return; }
+        masterKKLokal.push({ kode, rt, nama, wa, nomor, rw });
+        localStorage.setItem('soskem_petugas_master', JSON.stringify(masterKKLokal));
+        Swal.fire('Berhasil', `Warga baru ditambahkan!<br>Gunakan kode: <b>${kode}</b>`, 'success');
+        document.getElementById('lokal-nama').value = ''; document.getElementById('lokal-wa').value = ''; document.getElementById('lokal-kk').value = '';
+        perbaruiStatusMaster(); generateKodeBukuLokal(); renderListWargaLokal();
+    });
+
+    function renderListWargaLokal() {
+        const wadah = document.getElementById('list-warga-lokal');
+        const cari = document.getElementById('cari-warga-lokal').value.toUpperCase();
+        wadah.innerHTML = '';
+        let limit = 20, count = 0;
+        for (let i = 0; i < masterKKLokal.length; i++) {
+            if (count >= limit && cari === "") break; 
+            let w = masterKKLokal[i];
+            if (cari !== "" && !w.kode.toUpperCase().includes(cari) && !w.nomor.includes(cari)) continue;
+            let isIncomplete = (!w.wa || w.nomor.includes("00000000") || (w.nama && w.nama.startsWith("Keluarga ISK")));
+            let dot = isIncomplete ? `<span style="color:#dc2626; font-size:10px;">(Data Kurang)</span>` : '';
+            wadah.innerHTML += `
+                <div class="log-item" style="padding: 8px;">
+                    <div class="log-info">
+                        <h4 style="font-size:12px;">${w.kode} ${dot}</h4>
+                        <p>KK: ${w.nomor.includes("00000")?"-":w.nomor}</p>
+                    </div>
+                    <button class="btn-action-sm" style="height:auto;" onclick="bukaModalWarga(${i})">Lengkapi</button>
+                </div>
+            `;
+            count++;
+        }
+    }
+
+    function bukaModalWarga(index) {
+        indexEditLokal = index;
+        const w = masterKKLokal[index];
+        document.getElementById('modal-lbl-kode').innerText = `Kode: ${w.kode}`;
+        document.getElementById('modal-inp-rt').value = w.rt || '01';
+        document.getElementById('modal-inp-nama').value = (w.nama && !w.nama.startsWith("Keluarga ISK")) ? w.nama : '';
+        document.getElementById('modal-inp-wa').value = w.wa || '';
+        document.getElementById('modal-inp-kk').value = (w.nomor.includes("0000")) ? "" : w.nomor;
+        document.getElementById('modalEditWarga').style.display = 'flex';
+    }
+    function tutupModalWarga() { document.getElementById('modalEditWarga').style.display = 'none'; indexEditLokal = null; }
+
+    function simpanPembaruanWarga() {
+        const rtBaru = document.getElementById('modal-inp-rt').value;
+        let w = masterKKLokal[indexEditLokal];
+        w.rt = rtBaru;
+        w.nama = document.getElementById('modal-inp-nama').value.trim();
+        w.wa = document.getElementById('modal-inp-wa').value.trim();
+        let kkInp = document.getElementById('modal-inp-kk').value.trim();
+        w.nomor = kkInp ? kkInp : "0000000000000000";
+        if (w.kode && !w.kode.includes('-')) w.kode = `${w.kode}-${rtBaru}`;
+        else if (w.kode && w.kode.includes('-')) w.kode = `${w.kode.split('-')[0]}-${rtBaru}`;
+        localStorage.setItem('soskem_petugas_master', JSON.stringify(masterKKLokal));
+        Swal.fire('Berhasil', 'Data warga dilengkapi!', 'success');
+        tutupModalWarga(); renderListWargaLokal();
+    }
+
+    // CANVAS & SETORAN DENGAN HIGH-RESOLUTION SMOOTHING
+    function setupSignaturePad() {
+        const canvas = document.getElementById('signatureCanvas');
+        const input = document.getElementById('signatureInput');
+        if (!canvas || !input) return;
+        setTimeout(() => {
+            const ratio = Math.max(window.devicePixelRatio || 1, 2);
+            const displayWidth = canvas.parentElement.offsetWidth - 4;
+            const displayHeight = 130;
+
+            canvas.width = displayWidth * ratio;
+            canvas.height = displayHeight * ratio;
+            canvas.style.width = displayWidth + 'px';
+            canvas.style.height = displayHeight + 'px';
+
+            const ctx = canvas.getContext('2d');
+            ctx.scale(ratio, ratio);
+            ctx.lineWidth = 2.2; 
+            ctx.lineCap = 'round'; 
+            ctx.lineJoin = 'round'; 
+            ctx.strokeStyle = '#0f2c23';
+
+            let drawing = false;
+            const getPos = (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const cX = e.touches ? e.touches[0].clientX : e.clientX; 
+                const cY = e.touches ? e.touches[0].clientY : e.clientY;
+                return { x: (cX - rect.left), y: (cY - rect.top) };
+            };
+
+            const start = (e) => { drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); e.preventDefault(); };
+            const move = (e) => { if (!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); e.preventDefault(); };
+            const stop = () => { if (!drawing) return; drawing = false; input.value = canvas.toDataURL('image/png'); };
+
+            canvas.onpointerdown = start; canvas.onpointermove = move; canvas.onpointerup = stop; canvas.onpointerleave = stop;
+            canvas.ontouchstart = start; canvas.ontouchmove = move; canvas.ontouchend = stop;
+        }, 100);
+    }
+    
+    function bersihkanTandaTangan() { 
+        const canvas = document.getElementById('signatureCanvas'); 
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height); 
+        document.getElementById('signatureInput').value = ''; 
+    }
+
+    document.getElementById('form-petugas').addEventListener('submit', function(e) {
+        e.preventDefault();
+        if (masterKKLokal.length === 0) { Swal.fire('Data Kosong', 'Tarik data dari Admin terlebih dahulu.', 'warning'); return; }
+        const rwInput = document.getElementById('ptg-rw').value; const subKode = document.getElementById('ptg-kode').value.trim().toUpperCase(); const angkaRW = rwInput.replace(/\D/g, '');
+        let jemaahValid = masterKKLokal.find(item => {
+            if (!item.kode) return false; let k = item.kode.toUpperCase();
+            return k === `ISK${angkaRW}/${subKode}` || k.includes(`/${subKode}-`);
+        });
+        if (!jemaahValid) { Swal.fire('Tidak Valid', `Kode "${subKode}" belum terdaftar.`, 'error'); return; }
+        const kodeLengkap = jemaahValid.kode; const tanggal = document.getElementById('ptg-tanggal').value; const periodeInput = document.getElementById('ptg-periode').value; const nominalInput = bersihkanFormatRupiah(document.getElementById('ptg-nominal').value); const signature = document.getElementById('signatureInput').value.trim();
+        if (!signature) { Swal.fire('Perhatian', 'Warga wajib menandatangani form.', 'warning'); return; }
+
+        let sisaDana = nominalInput; const susPeriode = ["Triwulan 1 (Jan-Mar)", "Triwulan 2 (Apr-Jun)", "Triwulan 3 (Jul-Sep)", "Triwulan 4 (Okt-Des)"]; let idxAwal = susPeriode.indexOf(periodeInput);
+        if (sisaDana >= TARIF_PER_TRIWULAN) { setoranHariIni.push({ tanggal, kode: kodeLengkap, rw: rwInput, periode: susPeriode[idxAwal], nominal: TARIF_PER_TRIWULAN, signature }); sisaDana -= TARIF_PER_TRIWULAN; }
+        for (let i = idxAwal + 1; i < susPeriode.length; i++) {
+            if (sisaDana < TARIF_PER_TRIWULAN) break;
+            setoranHariIni.push({ tanggal, kode: kodeLengkap, rw: rwInput, periode: susPeriode[i], nominal: TARIF_PER_TRIWULAN, signature }); sisaDana -= TARIF_PER_TRIWULAN;
+        }
+        if (sisaDana > 0) { setoranHariIni.push({ tanggal, kode: kodeLengkap, rw: rwInput, periode: "Kompensasi", nominal: sisaDana, signature }); }
+
+        localStorage.setItem('soskem_petugas_iuran', JSON.stringify(setoranHariIni));
+        Swal.fire('Sukses', `Setoran Rp ${nominalInput.toLocaleString('id-ID')} tersimpan!`, 'success');
+        document.getElementById('ptg-kode').value = ''; document.getElementById('ptg-nominal').value = 'Rp 25.000'; document.getElementById('preview-kk').innerHTML = ''; bersihkanTandaTangan(); renderLogSetoran();
+    });
+
+    function renderLogSetoran() {
+        const wadah = document.getElementById('list-setoran-lapangan'); wadah.innerHTML = ''; let total = 0; let reversed = [...setoranHariIni].reverse();
+        reversed.forEach((item, index) => {
+            total += parseInt(item.nominal); let idxAsli = setoranHariIni.length - 1 - index;
+            wadah.innerHTML += `<div class="log-item"><div class="log-info"><h4>${item.kode}</h4><p>${item.periode} - Rp ${item.nominal.toLocaleString('id-ID')}</p></div><button class="btn-hapus" onclick="hapusSetoranLokal(${idxAsli})">Batal</button></div>`;
+        });
+        document.getElementById('total-uang-hari-ini').innerText = `Rp ${total.toLocaleString('id-ID')}`;
+        if(setoranHariIni.length === 0) wadah.innerHTML = `<p style="font-size:11px; text-align:center; color:#94a3b8; padding:15px 0;">Belum ada tagihan hari ini.</p>`;
+    }
+
+    function hapusSetoranLokal(index) {
+        Swal.fire({ title: 'Batalkan input?', icon: 'warning', showCancelButton: true }).then((res) => {
+            if (res.isConfirmed) { setoranHariIni.splice(index, 1); localStorage.setItem('soskem_petugas_iuran', JSON.stringify(setoranHariIni)); renderLogSetoran(); }
+        });
+    }
+
+    // PROSES IMPORT & EXPORT
+    function pemicuImporMaster() { document.getElementById('input-file-master').click(); }
+    function prosesImporMaster(event) {
+        const file = event.target.files[0]; if (!file) return; const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const hasil = JSON.parse(e.target.result);
+                if (hasil.master_kk) {
+                    masterKKLokal = hasil.master_kk; localStorage.setItem('soskem_petugas_master', JSON.stringify(masterKKLokal));
+                    Swal.fire('Sukses', 'Data warga ditarik. Siap keliling!', 'success'); perbaruiStatusMaster(); renderListWargaLokal();
+                } else { Swal.fire('Gagal', 'File bukan Backup SOSKEM.', 'error'); }
+            } catch (err) { Swal.fire('Error', 'Gagal Membaca File.', 'error'); }
+        }; reader.readAsText(file); event.target.value = '';
+    }
+
+    async function eksporSetoranLapangan() {
+        if (setoranHariIni.length === 0 && masterKKLokal.length === 0) { Swal.fire('Info', 'Tidak ada data untuk dikirim.', 'info'); return; }
+        const dataKirim = { tipe_file: "SETORAN_LAPANGAN_SOSKEM", tanggal_kirim: new Date().toISOString(), data_iuran: setoranHariIni, data_master_update: masterKKLokal };
+        const isiJson = JSON.stringify(dataKirim, null, 2); const fileBlob = new Blob([isiJson], { type: "application/json" });
+        const namaFile = `Laporan_Lapangan_${new Date().toISOString().split('T')[0]}.json`; const fileShare = new File([fileBlob], namaFile, { type: "application/json" });
+
+        if (navigator.canShare && navigator.canShare({ files: [fileShare] })) {
+            try {
+                await navigator.share({ title: 'Laporan Setoran & Warga', text: 'Assalamu\'alaikum Admin, ini file laporan dari lapangan.', files: [fileShare] });
+                konfirmasiPembersihanLayar();
+            } catch (error) { console.log('Share dibatalkan'); }
+        } else {
+            let link = document.createElement("a"); link.href = URL.createObjectURL(fileBlob); link.download = namaFile; document.body.appendChild(link); link.click(); document.body.removeChild(link);
+            Swal.fire({ title: 'File Diunduh', text: 'Kirim file yang terdownload ke WA Admin.', icon: 'info', showCancelButton: true, confirmButtonColor: '#25d366', confirmButtonText: '💬 Buka WA Admin', cancelButtonText: 'Tutup' })
+            .then((res) => {
+                if (res.isConfirmed) { window.open(`https://wa.me/${NOMOR_WA_ADMIN}?text=${encodeURIComponent("Assalamu'alaikum Admin, file laporan dari lapangan sudah saya download. Berikut saya lampirkan filenya:")}`, '_blank'); konfirmasiPembersihanLayar(); }
+                else konfirmasiPembersihanLayar();
+            });
+        }
+    }
+    function konfirmasiPembersihanLayar() {
+        setTimeout(() => {
+            Swal.fire({ title: 'Selesai Dikirim?', text: 'Kosongkan history setoran hari ini untuk besok? (Data warga aman).', icon: 'question', showCancelButton: true, confirmButtonColor: '#059669', confirmButtonText: 'Ya, Kosongkan' })
+            .then((res) => { if (res.isConfirmed) { setoranHariIni = []; localStorage.removeItem('soskem_petugas_iuran'); renderLogSetoran(); } });
+        }, 1500);
+    }
+</script>
+</body>
+</html>
