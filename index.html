@@ -179,7 +179,7 @@
                 <div class="form-group"><label>Kode Buku (Otomatis)</label><input type="text" id="lokal-kode" class="form-control" readonly style="background:#f1f5f9; font-weight:bold;"></div>
                 <div class="form-group"><label>Nama Kepala Keluarga</label><input type="text" id="lokal-nama" class="form-control" placeholder="Nama..." required></div>
                 
-                <!-- INPUT NOMOR WA DENGAN VOICE ANTI-LOOP -->
+                <!-- INPUT NOMOR WA DENGAN VOICE FIXED -->
                 <div class="form-group">
                     <label>Nomor WhatsApp</label>
                     <div style="display: flex; gap: 5px;">
@@ -188,7 +188,7 @@
                     </div>
                 </div>
 
-                <!-- INPUT NO KK DENGAN VOICE ANTI-LOOP -->
+                <!-- INPUT NO KK DENGAN VOICE FIXED -->
                 <div class="form-group">
                     <label>No. KK (16 Digit)</label>
                     <div style="display: flex; gap: 5px;">
@@ -283,7 +283,7 @@
         renderListWargaLokal();
     });
 
-    // FUNGSI VOICE INPUT ANTI-LOOP (MENGHINDARI PENGULANGAN ANGKA)
+    // FUNGSI VOICE INPUT FIXED (TIDAK MELOOP / MENUMPUK)
     function mulaiVoiceInput(targetId) {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (!SpeechRecognition) {
@@ -296,7 +296,8 @@
         recognition.continuous = true;
         recognition.interimResults = true;
 
-        let accumulatedText = '';
+        let finalTranscript = '';
+        window._tempVoiceText = '';
 
         Swal.fire({
             title: '🎙️ Sedang Mendengarkan...',
@@ -312,12 +313,12 @@
             },
             preConfirm: () => {
                 recognition.stop();
-                return accumulatedText;
+                return window._tempVoiceText || finalTranscript;
             }
         }).then((result) => {
             if (result.isConfirmed) {
-                // Ambil angkanya saja secara bersih
-                const angkaBersih = accumulatedText.replace(/[^0-9]/g, '');
+                const rawText = result.value || '';
+                const angkaBersih = rawText.replace(/[^0-9]/g, '');
                 if (angkaBersih) {
                     document.getElementById(targetId).value = angkaBersih;
                 } else {
@@ -328,18 +329,21 @@
             }
         });
 
-        // Memetakan ulang dari indeks 0 setiap ada update agar tidak looping / menumpuk dobel
         recognition.onresult = function(event) {
-            let currentFullTranscript = '';
-            for (let i = 0; i < event.results.length; ++i) {
-                currentFullTranscript += event.results[i][0].transcript + ' ';
+            let interimTranscript = '';
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
+                if (event.results[i].isFinal) {
+                    finalTranscript += event.results[i][0].transcript + ' ';
+                } else {
+                    interimTranscript += event.results[i][0].transcript;
+                }
             }
-            accumulatedText = currentFullTranscript;
+            const fullText = (finalTranscript + interimTranscript).trim();
+            window._tempVoiceText = fullText;
             
             const box = document.getElementById('live-speech-box');
             if (box) {
-                let tampil = accumulatedText.trim();
-                box.innerText = tampil !== '' ? tampil : 'Mendengarkan...';
+                box.innerText = fullText !== '' ? fullText : 'Mendengarkan...';
             }
         };
 
