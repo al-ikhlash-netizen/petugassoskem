@@ -178,8 +178,25 @@
                 </div>
                 <div class="form-group"><label>Kode Buku (Otomatis)</label><input type="text" id="lokal-kode" class="form-control" readonly style="background:#f1f5f9; font-weight:bold;"></div>
                 <div class="form-group"><label>Nama Kepala Keluarga</label><input type="text" id="lokal-nama" class="form-control" placeholder="Nama..." required></div>
-                <div class="form-group"><label>Nomor WhatsApp</label><input type="text" id="lokal-wa" class="form-control" placeholder="Contoh: 081234..."></div>
-                <div class="form-group"><label>No. KK (16 Digit)</label><input type="text" id="lokal-kk" class="form-control" placeholder="Bisa disusul jika blm ada..." maxlength="16"></div>
+                
+                <!-- INPUT NOMOR WA DENGAN TOMBOL VOICE (BICARA) -->
+                <div class="form-group">
+                    <label>Nomor WhatsApp</label>
+                    <div style="display: flex; gap: 5px;">
+                        <input type="text" id="lokal-wa" class="form-control" placeholder="Contoh: 081234...">
+                        <button type="button" class="btn-action-sm" style="background: #0284c7; padding: 0 12px;" onclick="mulaiVoiceInput('lokal-wa')" title="Input Suara">🎤 Bicara</button>
+                    </div>
+                </div>
+
+                <!-- INPUT NO KK DENGAN TOMBOL VOICE (BICARA) -->
+                <div class="form-group">
+                    <label>No. KK (16 Digit)</label>
+                    <div style="display: flex; gap: 5px;">
+                        <input type="text" id="lokal-kk" class="form-control" placeholder="Bisa disusul jika blm ada..." maxlength="16">
+                        <button type="button" class="btn-action-sm" style="background: #0284c7; padding: 0 12px;" onclick="mulaiVoiceInput('lokal-kk')" title="Input Suara">🎤 Bicara</button>
+                    </div>
+                </div>
+
                 <button type="submit" class="btn-native" style="background: var(--primary-dark); padding: 10px; font-size: 12px;">Daftarkan Warga</button>
             </form>
         </div>
@@ -223,8 +240,23 @@
             </select>
         </div>
         <div class="form-group"><label>Nama Kepala Keluarga</label><input type="text" id="modal-inp-nama" class="form-control"></div>
-        <div class="form-group"><label>Nomor WA</label><input type="text" id="modal-inp-wa" class="form-control"></div>
-        <div class="form-group"><label>No. KK</label><input type="text" id="modal-inp-kk" class="form-control" maxlength="16"></div>
+        
+        <div class="form-group">
+            <label>Nomor WA</label>
+            <div style="display: flex; gap: 5px;">
+                <input type="text" id="modal-inp-wa" class="form-control">
+                <button type="button" class="btn-action-sm" style="background: #0284c7; padding: 0 10px;" onclick="mulaiVoiceInput('modal-inp-wa')">🎤</button>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>No. KK</label>
+            <div style="display: flex; gap: 5px;">
+                <input type="text" id="modal-inp-kk" class="form-control" maxlength="16">
+                <button type="button" class="btn-action-sm" style="background: #0284c7; padding: 0 10px;" onclick="mulaiVoiceInput('modal-inp-kk')">🎤</button>
+            </div>
+        </div>
+
         <div class="modal-footer">
             <button class="btn-action-sm" onclick="tutupModalWarga()" style="background:#cbd5e1; color:#334155;">Batal</button>
             <button class="btn-action-sm" onclick="simpanPembaruanWarga()" style="background:#059669;">Simpan</button>
@@ -250,6 +282,41 @@
         generateKodeBukuLokal();
         renderListWargaLokal();
     });
+
+    // FUNGSI VOICE INPUT (SPEECH RECOGNITION)
+    function mulaiVoiceInput(targetId) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+            Swal.fire('Info', 'Fitur suara tidak didukung di browser ini. Gunakan mikrofon pada keyboard HP Anda.', 'info');
+            return;
+        }
+
+        const recognition = new SpeechRecognition();
+        recognition.lang = 'id-ID';
+        recognition.interimResults = false;
+
+        Swal.fire({
+            title: 'Mendengarkan...',
+            text: 'Silakan sebutkan nomornya dengan jelas...',
+            icon: 'info',
+            showConfirmButton: false,
+            timer: 4000
+        });
+
+        recognition.onresult = function(event) {
+            const transcript = event.results[0][0].transcript;
+            // Ambil angkanya saja jika berupa nomor
+            const angkaBersih = transcript.replace(/[^0-9]/g, '');
+            document.getElementById(targetId).value = angkaBersih;
+            Swal.close();
+        };
+
+        recognition.onerror = function() {
+            Swal.fire('Gagal', 'Suara tidak dikenali, silakan coba lagi.', 'error');
+        };
+
+        recognition.start();
+    }
 
     function pindahTabLokal(indexTab, elBtn) {
         const listTabID = ['tab-tagihan', 'tab-warga'];
@@ -531,7 +598,7 @@
                 if (hasil.master_kk) {
                     masterKKLokal = hasil.master_kk; localStorage.setItem('soskem_petugas_master', JSON.stringify(masterKKLokal));
                     Swal.fire('Sukses', 'Data warga ditarik. Siap keliling!', 'success'); perbaruiStatusMaster(); renderListWargaLokal();
-                } else { Swal.fire('Gagal', 'File bukan Backup SOSKEM.', 'error'); }
+                } else { Swal.fire('Gagal', 'File bukan file Backup SOSKEM.', 'error'); }
             } catch (err) { Swal.fire('Error', 'Gagal Membaca File.', 'error'); }
         }; reader.readAsText(file); event.target.value = '';
     }
