@@ -179,7 +179,7 @@
                 <div class="form-group"><label>Kode Buku (Otomatis)</label><input type="text" id="lokal-kode" class="form-control" readonly style="background:#f1f5f9; font-weight:bold;"></div>
                 <div class="form-group"><label>Nama Kepala Keluarga</label><input type="text" id="lokal-nama" class="form-control" placeholder="Nama..." required></div>
                 
-                <!-- INPUT NOMOR WA DENGAN TOMBOL VOICE (BICARA) -->
+                <!-- INPUT NOMOR WA DENGAN VOICE CONTINUOUS -->
                 <div class="form-group">
                     <label>Nomor WhatsApp</label>
                     <div style="display: flex; gap: 5px;">
@@ -188,7 +188,7 @@
                     </div>
                 </div>
 
-                <!-- INPUT NO KK DENGAN TOMBOL VOICE (BICARA) -->
+                <!-- INPUT NO KK DENGAN VOICE CONTINUOUS -->
                 <div class="form-group">
                     <label>No. KK (16 Digit)</label>
                     <div style="display: flex; gap: 5px;">
@@ -283,7 +283,7 @@
         renderListWargaLokal();
     });
 
-    // FUNGSI VOICE INPUT (SPEECH RECOGNITION)
+    // FUNGSI VOICE INPUT CONTINUOUS (BISA PANJANG & ADA TOMBOL SELESAI)
     function mulaiVoiceInput(targetId) {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (!SpeechRecognition) {
@@ -293,29 +293,60 @@
 
         const recognition = new SpeechRecognition();
         recognition.lang = 'id-ID';
-        recognition.interimResults = false;
+        recognition.continuous = true;      // Mendengarkan terus tanpa cepat mati
+        recognition.interimResults = true;  // Menampilkan teks langsung saat bersuara
+
+        let finalTranscript = '';
 
         Swal.fire({
-            title: 'Mendengarkan...',
-            text: 'Silakan sebutkan nomornya dengan jelas...',
-            icon: 'info',
-            showConfirmButton: false,
-            timer: 4000
+            title: '🎙️ Sedang Mendengarkan...',
+            html: '<p style="font-size:12px; color:#64748b; margin-bottom:10px;">Sebutkan nomor dengan jelas (boleh ada jeda).<br>Tekan tombol <b>Selesai</b> jika sudah lengkap.</p>' +
+                  '<div id="live-speech-box" style="font-size:15px; font-weight:bold; color:#0f2c23; min-height:45px; max-height:80px; overflow-y:auto; padding:8px; background:#f1f5f9; border-radius:6px; word-break:break-all; border:1px solid #cbd5e1;">Mendengarkan suara Anda...</div>',
+            showCancelButton: true,
+            confirmButtonText: '✅ Selesai',
+            cancelButtonText: 'Batal',
+            confirmButtonColor: '#059669',
+            allowOutsideClick: false,
+            didOpen: () => {
+                recognition.start();
+            },
+            preConfirm: () => {
+                recognition.stop();
+                return finalTranscript;
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Ambil angkanya saja, hilangkan spasi atau huruf agar rapi
+                const angkaBersih = finalTranscript.replace(/[^0-9]/g, '');
+                if (angkaBersih) {
+                    document.getElementById(targetId).value = angkaBersih;
+                } else {
+                    Swal.fire('Perhatian', 'Tidak ada angka yang terdeteksi dari suara Anda.', 'warning');
+                }
+            } else {
+                recognition.stop();
+            }
         });
 
         recognition.onresult = function(event) {
-            const transcript = event.results[0][0].transcript;
-            // Ambil angkanya saja jika berupa nomor
-            const angkaBersih = transcript.replace(/[^0-9]/g, '');
-            document.getElementById(targetId).value = angkaBersih;
-            Swal.close();
+            let interim = '';
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
+                if (event.results[i].isFinal) {
+                    finalTranscript += event.results[i][0].transcript + ' ';
+                } else {
+                    interim += event.results[i][0].transcript;
+                }
+            }
+            const box = document.getElementById('live-speech-box');
+            if (box) {
+                let tampil = (finalTranscript + interim).trim();
+                box.innerText = tampil !== '' ? tampil : 'Mendengarkan...';
+            }
         };
 
         recognition.onerror = function() {
-            Swal.fire('Gagal', 'Suara tidak dikenali, silakan coba lagi.', 'error');
+            // Biarkan berjalan fleksibel tanpa menghentikan paksa
         };
-
-        recognition.start();
     }
 
     function pindahTabLokal(indexTab, elBtn) {
