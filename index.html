@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Petugas SOSKEM - Jami Al-Ikhlash</title>
     <link rel="manifest" href="manifest.json">
-
     
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -165,7 +164,17 @@
             <form id="form-master-lokal">
                 <div class="form-group" style="display: flex; gap: 8px;">
                     <div style="flex: 1;"><label>RW</label><select id="lokal-rw" class="form-control" required onchange="generateKodeBukuLokal()"><option value="RW 18">RW 18</option><option value="RW 19">RW 19</option><option value="RW 20">RW 20</option></select></div>
-                    <div style="flex: 1;"><label>RT</label><select id="lokal-rt" class="form-control" required onchange="generateKodeBukuLokal()"><option value="01">RT 01</option><option value="02">RT 02</option><option value="03">RT 03</option><option value="04">RT 04</option><option value="05">RT 05</option><option value="06">RT 06</option><option value="07">RT 07</option><option value="08">RT 08</option><option value="09">RT 09</option><option value="10">RT 10</option></select></div>
+                    <div style="flex: 1;">
+                        <label>RT</label>
+                        <select id="lokal-rt" class="form-control" required onchange="generateKodeBukuLokal()">
+                            <option value="01">RT 01</option>
+                            <option value="02">RT 02</option>
+                            <option value="03">RT 03</option>
+                            <option value="04">RT 04</option>
+                            <option value="05">RT 05</option>
+                            <option value="XX">Belum Diketahui</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="form-group"><label>Kode Buku (Otomatis)</label><input type="text" id="lokal-kode" class="form-control" readonly style="background:#f1f5f9; font-weight:bold;"></div>
                 <div class="form-group"><label>Nama Kepala Keluarga</label><input type="text" id="lokal-nama" class="form-control" placeholder="Nama..." required></div>
@@ -202,7 +211,17 @@
     <div class="modal-content">
         <div class="modal-header">Lengkapi Data Warga</div>
         <div class="form-group"><label id="modal-lbl-kode">Kode Buku: -</label></div>
-        <div class="form-group"><label>RT</label><select id="modal-inp-rt" class="form-control"><option value="01">RT 01</option><option value="02">RT 02</option><option value="03">RT 03</option><option value="04">RT 04</option><option value="05">RT 05</option><option value="06">RT 06</option><option value="07">RT 07</option><option value="08">RT 08</option><option value="09">RT 09</option><option value="10">RT 10</option></select></div>
+        <div class="form-group">
+            <label>RT</label>
+            <select id="modal-inp-rt" class="form-control">
+                <option value="01">RT 01</option>
+                <option value="02">RT 02</option>
+                <option value="03">RT 03</option>
+                <option value="04">RT 04</option>
+                <option value="05">RT 05</option>
+                <option value="XX">Belum Diketahui</option>
+            </select>
+        </div>
         <div class="form-group"><label>Nama Kepala Keluarga</label><input type="text" id="modal-inp-nama" class="form-control"></div>
         <div class="form-group"><label>Nomor WA</label><input type="text" id="modal-inp-wa" class="form-control"></div>
         <div class="form-group"><label>No. KK</label><input type="text" id="modal-inp-kk" class="form-control" maxlength="16"></div>
