@@ -172,8 +172,8 @@
                     <input type="text" id="lokal-wa" class="form-control" placeholder="Contoh: 081234...">
                 </div>
                 <div class="form-group">
-                    <label>No. KK (16 Digit)</label>
-                    <input type="text" id="lokal-kk" class="form-control" placeholder="Bisa disusul jika blm ada..." maxlength="16">
+                    <label>Jumlah Jiwa</label>
+                    <input type="text" id="lokal-jiwa" class="form-control" list="list-jiwa" placeholder="Pilih atau ketik manual...">
                 </div>
                 <button type="submit" class="btn-native" style="background: var(--primary-dark); padding: 10px; font-size: 12px;">Daftarkan Warga</button>
             </form>
@@ -181,22 +181,34 @@
 
         <div class="card-native">
             <h3 style="display: flex; justify-content: space-between;"><span>👥 Data Warga Lokal</span><span id="badge-jml-warga" style="font-size:10px; background:#e2e8f0; padding:2px 6px; border-radius:4px;">0 KK</span></h3>
-            <input type="text" id="cari-warga-lokal" class="form-control" placeholder="🔍 Cari Kode / No KK..." onkeyup="renderListWargaLokal()" style="margin-bottom: 10px; font-size: 11px; padding: 8px;">
+            <input type="text" id="cari-warga-lokal" class="form-control" placeholder="🔍 Cari Kode / Nama..." onkeyup="renderListWargaLokal()" style="margin-bottom: 10px; font-size: 11px; padding: 8px;">
             <div id="list-warga-lokal" style="display: flex; flex-direction: column; gap: 8px;"></div>
         </div>
     </div>
 </div>
+
+<!-- DATALIST UNTUK JUMLAH JIWA -->
+<datalist id="list-jiwa">
+    <option value="1"></option>
+    <option value="2"></option>
+    <option value="3"></option>
+    <option value="4"></option>
+    <option value="5"></option>
+    <option value="6"></option>
+    <option value="7"></option>
+    <option value="8"></option>
+</datalist>
 
 <nav class="bottom-nav">
     <button class="nav-item active" onclick="pindahTabLokal(0, this)"><span class="icon">💰</span><span>Tagihan</span></button>
     <button class="nav-item" onclick="pindahTabLokal(1, this)"><span class="icon">👥</span><span>Data Warga</span></button>
 </nav>
 
-<!-- MODAL CARI KODE/KK -->
+<!-- MODAL CARI KODE -->
 <div id="modalCariKode" class="modal">
     <div class="modal-content" style="padding: 15px;">
-        <div class="modal-header"><span>🔍 Cari Kode Buku / KK</span><span onclick="tutupModalCariKode()" style="color:#dc2626; cursor:pointer;">✖</span></div>
-        <input type="text" id="input-cari-modal" class="form-control" placeholder="Ketik angka kode (misal 015) atau No KK..." onkeyup="renderListCariKode()" style="margin-bottom:12px;">
+        <div class="modal-header"><span>🔍 Cari Kode Buku</span><span onclick="tutupModalCariKode()" style="color:#dc2626; cursor:pointer;">✖</span></div>
+        <input type="text" id="input-cari-modal" class="form-control" placeholder="Ketik angka kode atau nama..." onkeyup="renderListCariKode()" style="margin-bottom:12px;">
         <div id="list-hasil-cari" style="max-height: 300px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px;"></div>
     </div>
 </div>
@@ -213,8 +225,8 @@
             <input type="text" id="modal-inp-wa" class="form-control">
         </div>
         <div class="form-group">
-            <label>No. KK</label>
-            <input type="text" id="modal-inp-kk" class="form-control" maxlength="16">
+            <label>Jumlah Jiwa</label>
+            <input type="text" id="modal-inp-jiwa" class="form-control" list="list-jiwa" placeholder="Pilih atau ketik manual...">
         </div>
         <div class="modal-footer">
             <button class="btn-action-sm" onclick="tutupModalWarga()" style="background:#cbd5e1; color:#334155;">Batal</button>
@@ -230,6 +242,21 @@
     let masterKKLokal = JSON.parse(localStorage.getItem('soskem_petugas_master')) || [];
     let setoranHariIni = JSON.parse(localStorage.getItem('soskem_petugas_iuran')) || [];
     let indexEditLokal = null;
+
+    // LOGIKA PENYESUAIAN DATA LAMA (Hapus KK yang terlanjur tersimpan dan jadikan kosong)
+    masterKKLokal = masterKKLokal.map(w => {
+        let jiwaAman = w.jiwa || "";
+        // Jika belum ada jiwa, tapi ada data di 'nomor' dari aplikasi lama
+        if (!w.jiwa && w.nomor) {
+            // Jika isi nomor KK (panjang, atau mengandung 0000), kita abaikan (kosongkan)
+            if (w.nomor.length > 3 || w.nomor.includes("0000")) {
+                jiwaAman = ""; 
+            } else {
+                jiwaAman = w.nomor; // Berjaga-jaga jika isinya angka wajar (misal 4)
+            }
+        }
+        return { ...w, jiwa: jiwaAman };
+    });
 
     document.addEventListener("DOMContentLoaded", function() {
         document.getElementById('ptg-tanggal').value = new Date().toISOString().split('T')[0];
@@ -317,7 +344,11 @@
         
         let filterData = masterKKLokal.filter(w => w.rw === rwTarget);
         if(kataKunci !== "") {
-            filterData = filterData.filter(w => w.kode.toUpperCase().includes(kataKunci) || w.nomor.includes(kataKunci));
+            // Pencarian hanya berdasarkan Kode dan Nama (Nomor KK sudah tidak ada)
+            filterData = filterData.filter(w => 
+                w.kode.toUpperCase().includes(kataKunci) || 
+                (w.nama && w.nama.toUpperCase().includes(kataKunci))
+            );
         }
 
         let count = 0;
@@ -327,8 +358,8 @@
             wadah.innerHTML += `
                 <div style="padding:10px; border:1px solid #e2e8f0; border-radius:8px; display:flex; justify-content:space-between; align-items:center; background:#f8fafc;">
                     <div>
-                        <div style="font-weight:bold; font-size:14px; color:var(--primary-dark);">${w.kode}</div>
-                        <div style="font-size:10px; color:#64748b; margin-top:2px;">No. KK: ${w.nomor.includes("000000") ? "-" : w.nomor}</div>
+                        <div style="font-weight:bold; font-size:14px; color:var(--primary-dark);">${w.kode} - ${w.nama ? w.nama : ''}</div>
+                        <div style="font-size:10px; color:#64748b; margin-top:2px;">Jumlah: ${w.jiwa ? w.jiwa + " Jiwa" : "-"}</div>
                     </div>
                     <button type="button" class="btn-action-sm" style="background:#059669; padding:6px 12px; height:auto;" onclick="pilihDariModal('${subKode}')">Pilih</button>
                 </div>
@@ -364,13 +395,18 @@
         const rt = document.getElementById('lokal-rt').value;
         const nama = document.getElementById('lokal-nama').value.trim();
         const wa = document.getElementById('lokal-wa').value.trim();
-        const nomor = document.getElementById('lokal-kk').value.trim() || "0000000000000000";
+        const jiwa = document.getElementById('lokal-jiwa').value.trim();
         const rw = document.getElementById('lokal-rw').value;
+        
         if (masterKKLokal.some(item => item.kode === kode)) { Swal.fire('Error', 'Kode sudah terpakai', 'error'); return; }
-        masterKKLokal.push({ kode, rt, nama, wa, nomor, rw });
+        
+        masterKKLokal.push({ kode, rt, nama, wa, jiwa, rw });
         localStorage.setItem('soskem_petugas_master', JSON.stringify(masterKKLokal));
         Swal.fire('Berhasil', `Warga baru ditambahkan!<br>Gunakan kode: <b>${kode}</b>`, 'success');
-        document.getElementById('lokal-nama').value = ''; document.getElementById('lokal-wa').value = ''; document.getElementById('lokal-kk').value = '';
+        
+        document.getElementById('lokal-nama').value = ''; 
+        document.getElementById('lokal-wa').value = ''; 
+        document.getElementById('lokal-jiwa').value = '';
         perbaruiStatusMaster(); generateKodeBukuLokal(); renderListWargaLokal();
     });
 
@@ -382,14 +418,19 @@
         for (let i = 0; i < masterKKLokal.length; i++) {
             if (count >= limit && cari === "") break; 
             let w = masterKKLokal[i];
-            if (cari !== "" && !w.kode.toUpperCase().includes(cari) && !w.nomor.includes(cari)) continue;
-            let isIncomplete = (!w.wa || w.nomor.includes("00000000") || (w.nama && w.nama.startsWith("Keluarga ISK")));
+            
+            // Filter berdasarkan kode ATAU nama
+            if (cari !== "" && !w.kode.toUpperCase().includes(cari) && !(w.nama && w.nama.toUpperCase().includes(cari))) continue;
+            
+            // Logika "Data Kurang": WA kosong ATAU Jiwa kosong
+            let isIncomplete = (!w.wa || !w.jiwa || w.jiwa === "0" || (w.nama && w.nama.startsWith("Keluarga ISK")));
             let dot = isIncomplete ? `<span style="color:#dc2626; font-size:10px;">(Data Kurang)</span>` : '';
+            
             wadah.innerHTML += `
                 <div class="log-item" style="padding: 8px;">
                     <div class="log-info">
                         <h4 style="font-size:12px;">${w.kode} ${dot}</h4>
-                        <p>KK: ${w.nomor.includes("00000")?"-":w.nomor}</p>
+                        <p>Nama: ${w.nama ? w.nama : '-'} | Jumlah: ${w.jiwa ? w.jiwa + ' Jiwa' : '-'}</p>
                     </div>
                     <button class="btn-action-sm" style="height:auto;" onclick="bukaModalWarga(${i})">Lengkapi</button>
                 </div>
@@ -405,9 +446,10 @@
         document.getElementById('modal-inp-rt').value = w.rt || '01';
         document.getElementById('modal-inp-nama').value = (w.nama && !w.nama.startsWith("Keluarga ISK")) ? w.nama : '';
         document.getElementById('modal-inp-wa').value = w.wa || '';
-        document.getElementById('modal-inp-kk').value = (w.nomor.includes("0000")) ? "" : w.nomor;
+        document.getElementById('modal-inp-jiwa').value = w.jiwa || '';
         document.getElementById('modalEditWarga').style.display = 'flex';
     }
+    
     function tutupModalWarga() { document.getElementById('modalEditWarga').style.display = 'none'; indexEditLokal = null; }
 
     function simpanPembaruanWarga() {
@@ -416,10 +458,11 @@
         w.rt = rtBaru;
         w.nama = document.getElementById('modal-inp-nama').value.trim();
         w.wa = document.getElementById('modal-inp-wa').value.trim();
-        let kkInp = document.getElementById('modal-inp-kk').value.trim();
-        w.nomor = kkInp ? kkInp : "0000000000000000";
+        w.jiwa = document.getElementById('modal-inp-jiwa').value.trim();
+        
         if (w.kode && !w.kode.includes('-')) w.kode = `${w.kode}-${rtBaru}`;
         else if (w.kode && w.kode.includes('-')) w.kode = `${w.kode.split('-')[0]}-${rtBaru}`;
+        
         localStorage.setItem('soskem_petugas_master', JSON.stringify(masterKKLokal));
         Swal.fire('Berhasil', 'Data warga dilengkapi!', 'success');
         tutupModalWarga(); renderListWargaLokal();
@@ -520,14 +563,25 @@
             try {
                 const hasil = JSON.parse(e.target.result);
                 if (hasil.master_kk) {
-                    masterKKLokal = hasil.master_kk; localStorage.setItem('soskem_petugas_master', JSON.stringify(masterKKLokal));
-                    Swal.fire('Sukses', 'Data warga ditarik. Siap keliling!', 'success'); perbaruiStatusMaster(); renderListWargaLokal();
+                    
+                    // Bersihkan data KK lama yang terbawa import dari server/file JSON lama
+                    masterKKLokal = hasil.master_kk.map(w => {
+                        let jiwaAman = w.jiwa || "";
+                        if (!w.jiwa && w.nomor) {
+                            if (w.nomor.length > 3 || w.nomor.includes("0000")) jiwaAman = ""; 
+                            else jiwaAman = w.nomor; 
+                        }
+                        return { ...w, jiwa: jiwaAman };
+                    });
+
+                    localStorage.setItem('soskem_petugas_master', JSON.stringify(masterKKLokal));
+                    Swal.fire('Sukses', 'Data warga ditarik. Siap keliling!', 'success'); 
+                    perbaruiStatusMaster(); renderListWargaLokal();
                 } else { Swal.fire('Gagal', 'File bukan Backup SOSKEM.', 'error'); }
             } catch (err) { Swal.fire('Error', 'Gagal Membaca File.', 'error'); }
         }; reader.readAsText(file); event.target.value = '';
     }
 
-    // FIX: Fungsi Ekspor disederhanakan dengan Download otomatis dan langsung membuka link WhatsApp
     async function eksporSetoranLapangan() {
         if (setoranHariIni.length === 0 && masterKKLokal.length === 0) { 
             Swal.fire('Info', 'Tidak ada data untuk dikirim.', 'info'); 
@@ -545,7 +599,6 @@
         const namaFile = `Laporan_Lapangan_${new Date().toISOString().split('T')[0]}.json`; 
         
         try {
-            // Proses Download File
             let link = document.createElement("a"); 
             link.href = URL.createObjectURL(fileBlob); 
             link.download = namaFile; 
@@ -553,7 +606,6 @@
             link.click(); 
             document.body.removeChild(link);
             
-            // Konfirmasi dan Redirect ke WhatsApp
             Swal.fire({ 
                 title: 'File Diunduh', 
                 text: 'Silakan kirim file JSON yang baru saja terdownload ke WA Admin.', 
