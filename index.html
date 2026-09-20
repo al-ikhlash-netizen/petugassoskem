@@ -163,7 +163,17 @@
             <form id="form-master-lokal">
                 <div class="form-group" style="display: flex; gap: 8px;">
                     <div style="flex: 1;"><label>RW</label><select id="lokal-rw" class="form-control" required onchange="generateKodeBukuLokal()"><option value="RW 18">RW 18</option><option value="RW 19">RW 19</option><option value="RW 20">RW 20</option></select></div>
-                    <div style="flex: 1;"><label>RT</label><select id="lokal-rt" class="form-control" required onchange="generateKodeBukuLokal()"><option value="01">RT 01</option><option value="02">RT 02</option><option value="03">RT 03</option><option value="04">RT 04</option><option value="05">RT 05</option><option value="06">RT 06</option><option value="07">RT 07</option><option value="08">RT 08</option><option value="09">RT 09</option><option value="10">RT 10</option></select></div>
+                    <div style="flex: 1;">
+                        <label>RT</label>
+                        <select id="lokal-rt" class="form-control" required onchange="generateKodeBukuLokal()">
+                            <option value="01">RT 1</option>
+                            <option value="02">RT 2</option>
+                            <option value="03">RT 3</option>
+                            <option value="04">RT 4</option>
+                            <option value="05">RT 5</option>
+                            <option value="00">RT Belum Diketahui</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="form-group"><label>Kode Buku (Otomatis)</label><input type="text" id="lokal-kode" class="form-control" readonly style="background:#f1f5f9; font-weight:bold;"></div>
                 <div class="form-group"><label>Nama Kepala Keluarga</label><input type="text" id="lokal-nama" class="form-control" placeholder="Nama..." required></div>
@@ -173,7 +183,17 @@
                 </div>
                 <div class="form-group">
                     <label>Jumlah Jiwa</label>
-                    <input type="text" id="lokal-jiwa" class="form-control" list="list-jiwa" placeholder="Pilih atau ketik manual...">
+                    <select id="lokal-jiwa" class="form-control" required>
+                        <option value="">-- Pilih Jumlah Jiwa --</option>
+                        <option value="1">1 Jiwa</option>
+                        <option value="2">2 Jiwa</option>
+                        <option value="3">3 Jiwa</option>
+                        <option value="4">4 Jiwa</option>
+                        <option value="5">5 Jiwa</option>
+                        <option value="6">6 Jiwa</option>
+                        <option value="7">7 Jiwa</option>
+                        <option value="8">8 Jiwa</option>
+                    </select>
                 </div>
                 <button type="submit" class="btn-native" style="background: var(--primary-dark); padding: 10px; font-size: 12px;">Daftarkan Warga</button>
             </form>
@@ -186,18 +206,6 @@
         </div>
     </div>
 </div>
-
-<!-- DATALIST UNTUK JUMLAH JIWA -->
-<datalist id="list-jiwa">
-    <option value="1"></option>
-    <option value="2"></option>
-    <option value="3"></option>
-    <option value="4"></option>
-    <option value="5"></option>
-    <option value="6"></option>
-    <option value="7"></option>
-    <option value="8"></option>
-</datalist>
 
 <nav class="bottom-nav">
     <button class="nav-item active" onclick="pindahTabLokal(0, this)"><span class="icon">💰</span><span>Tagihan</span></button>
@@ -218,7 +226,17 @@
     <div class="modal-content">
         <div class="modal-header">Lengkapi Data Warga</div>
         <div class="form-group"><label id="modal-lbl-kode">Kode Buku: -</label></div>
-        <div class="form-group"><label>RT</label><select id="modal-inp-rt" class="form-control"><option value="01">RT 01</option><option value="02">RT 02</option><option value="03">RT 03</option><option value="04">RT 04</option><option value="05">RT 05</option><option value="06">RT 06</option><option value="07">RT 07</option><option value="08">RT 08</option><option value="09">RT 09</option><option value="10">RT 10</option></select></div>
+        <div class="form-group">
+            <label>RT</label>
+            <select id="modal-inp-rt" class="form-control">
+                <option value="01">RT 1</option>
+                <option value="02">RT 2</option>
+                <option value="03">RT 3</option>
+                <option value="04">RT 4</option>
+                <option value="05">RT 5</option>
+                <option value="00">RT Belum Diketahui</option>
+            </select>
+        </div>
         <div class="form-group"><label>Nama Kepala Keluarga</label><input type="text" id="modal-inp-nama" class="form-control"></div>
         <div class="form-group">
             <label>Nomor WA</label>
@@ -226,9 +244,19 @@
         </div>
         <div class="form-group">
             <label>Jumlah Jiwa</label>
-            <input type="text" id="modal-inp-jiwa" class="form-control" list="list-jiwa" placeholder="Pilih atau ketik manual...">
+            <select id="modal-inp-jiwa" class="form-control">
+                <option value="">-- Pilih Jumlah Jiwa --</option>
+                <option value="1">1 Jiwa</option>
+                <option value="2">2 Jiwa</option>
+                <option value="3">3 Jiwa</option>
+                <option value="4">4 Jiwa</option>
+                <option value="5">5 Jiwa</option>
+                <option value="6">6 Jiwa</option>
+                <option value="7">7 Jiwa</option>
+                <option value="8">8 Jiwa</option>
+            </select>
         </div>
-        <div class="modal-footer">
+        <div class="modal-footer" style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 15px;">
             <button class="btn-action-sm" onclick="tutupModalWarga()" style="background:#cbd5e1; color:#334155;">Batal</button>
             <button class="btn-action-sm" onclick="simpanPembaruanWarga()" style="background:#059669;">Simpan</button>
         </div>
@@ -246,13 +274,11 @@
     // LOGIKA PENYESUAIAN DATA LAMA (Hapus KK yang terlanjur tersimpan dan jadikan kosong)
     masterKKLokal = masterKKLokal.map(w => {
         let jiwaAman = w.jiwa || "";
-        // Jika belum ada jiwa, tapi ada data di 'nomor' dari aplikasi lama
         if (!w.jiwa && w.nomor) {
-            // Jika isi nomor KK (panjang, atau mengandung 0000), kita abaikan (kosongkan)
             if (w.nomor.length > 3 || w.nomor.includes("0000")) {
                 jiwaAman = ""; 
             } else {
-                jiwaAman = w.nomor; // Berjaga-jaga jika isinya angka wajar (misal 4)
+                jiwaAman = w.nomor; 
             }
         }
         return { ...w, jiwa: jiwaAman };
@@ -344,7 +370,6 @@
         
         let filterData = masterKKLokal.filter(w => w.rw === rwTarget);
         if(kataKunci !== "") {
-            // Pencarian hanya berdasarkan Kode dan Nama (Nomor KK sudah tidak ada)
             filterData = filterData.filter(w => 
                 w.kode.toUpperCase().includes(kataKunci) || 
                 (w.nama && w.nama.toUpperCase().includes(kataKunci))
@@ -395,7 +420,7 @@
         const rt = document.getElementById('lokal-rt').value;
         const nama = document.getElementById('lokal-nama').value.trim();
         const wa = document.getElementById('lokal-wa').value.trim();
-        const jiwa = document.getElementById('lokal-jiwa').value.trim();
+        const jiwa = document.getElementById('lokal-jiwa').value;
         const rw = document.getElementById('lokal-rw').value;
         
         if (masterKKLokal.some(item => item.kode === kode)) { Swal.fire('Error', 'Kode sudah terpakai', 'error'); return; }
@@ -419,11 +444,9 @@
             if (count >= limit && cari === "") break; 
             let w = masterKKLokal[i];
             
-            // Filter berdasarkan kode ATAU nama
             if (cari !== "" && !w.kode.toUpperCase().includes(cari) && !(w.nama && w.nama.toUpperCase().includes(cari))) continue;
             
-            // Logika "Data Kurang": WA kosong ATAU Jiwa kosong
-            let isIncomplete = (!w.wa || !w.jiwa || w.jiwa === "0" || (w.nama && w.nama.startsWith("Keluarga ISK")));
+            let isIncomplete = (!w.wa || !w.jiwa || w.jiwa === "" || w.jiwa === "0" || (w.nama && w.nama.startsWith("Keluarga ISK")));
             let dot = isIncomplete ? `<span style="color:#dc2626; font-size:10px;">(Data Kurang)</span>` : '';
             
             wadah.innerHTML += `
@@ -458,7 +481,7 @@
         w.rt = rtBaru;
         w.nama = document.getElementById('modal-inp-nama').value.trim();
         w.wa = document.getElementById('modal-inp-wa').value.trim();
-        w.jiwa = document.getElementById('modal-inp-jiwa').value.trim();
+        w.jiwa = document.getElementById('modal-inp-jiwa').value;
         
         if (w.kode && !w.kode.includes('-')) w.kode = `${w.kode}-${rtBaru}`;
         else if (w.kode && w.kode.includes('-')) w.kode = `${w.kode.split('-')[0]}-${rtBaru}`;
@@ -468,7 +491,7 @@
         tutupModalWarga(); renderListWargaLokal();
     }
 
-    // CANVAS & SETORAN DENGAN HIGH-RESOLUTION SMOOTHING
+    // CANVAS & SETORAN
     function setupSignaturePad() {
         const canvas = document.getElementById('signatureCanvas');
         const input = document.getElementById('signatureInput');
@@ -563,8 +586,6 @@
             try {
                 const hasil = JSON.parse(e.target.result);
                 if (hasil.master_kk) {
-                    
-                    // Bersihkan data KK lama yang terbawa import dari server/file JSON lama
                     masterKKLokal = hasil.master_kk.map(w => {
                         let jiwaAman = w.jiwa || "";
                         if (!w.jiwa && w.nomor) {
