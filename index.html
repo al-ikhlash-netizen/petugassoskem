@@ -256,7 +256,6 @@
 
     // ============================================================
     // VOICE INPUT ANGKA - KHUSUS NOMOR WA & NO. KK
-    // Tidak mengubah logika aplikasi lainnya.
     // ============================================================
     let voiceRecognitionAktif = null;
     let voiceSessionId = 0;
@@ -293,8 +292,6 @@
                 return;
             }
 
-            // Jika browser sudah memberikan angka, pertahankan apa adanya.
-            // Jangan gunakan Number()/parseInt() agar 0 di depan tidak hilang.
             if (/^\d+$/.test(token)) {
                 hasil += token;
             }
@@ -313,7 +310,6 @@
         const targetEl = document.getElementById(targetId);
         if (!targetEl) return;
 
-        // Hentikan sesi sebelumnya agar tidak ada dua recognition yang berjalan bersamaan.
         if (voiceRecognitionAktif) {
             try { voiceRecognitionAktif.stop(); } catch (e) {}
             voiceRecognitionAktif = null;
@@ -345,21 +341,15 @@
                 if (sessionId !== voiceSessionId) return;
                 try {
                     recognition.start();
-                } catch (e) {
-                    // Browser dapat melempar error jika start dipanggil ketika sesi masih aktif.
-                }
+                } catch (e) {}
             },
             preConfirm: () => {
                 sesiDihentikan = true;
                 try { recognition.stop(); } catch (e) {}
-
-                // Hanya final + interim TERKINI.
-                // Interim tidak pernah ditambahkan berkali-kali ke finalTranscript.
                 return finalTranscript + ' ' + interimTranscript;
             }
         }).then((result) => {
             if (voiceRecognitionAktif === recognition) voiceRecognitionAktif = null;
-
             if (sessionId !== voiceSessionId) return;
 
             if (result.isConfirmed) {
@@ -373,7 +363,6 @@
 
                 if (angkaBersih) {
                     targetEl.value = angkaBersih;
-                    // Tetap hanya mengubah field target. Tidak submit dan tidak menyimpan otomatis.
                     targetEl.dispatchEvent(new Event('input', { bubbles: true }));
                 } else {
                     Swal.fire('Perhatian', 'Tidak ada angka yang terdeteksi dari suara Anda.', 'warning');
@@ -387,7 +376,8 @@
             let newFinal = '';
             let newInterim = '';
 
-            for (let i = event.resultIndex; i < event.results.length; i++) {
+            // MULAI DARI 0 untuk menimpa ulang seluruh kalimat & mencegah duplikasi angka (menumpuk) di Android Chrome
+            for (let i = 0; i < event.results.length; i++) {
                 const transcript = event.results[i][0].transcript || '';
                 if (event.results[i].isFinal) {
                     newFinal += transcript + ' ';
@@ -396,8 +386,8 @@
                 }
             }
 
-            // Final hanya ditambahkan sekali. Interim hanya snapshot terbaru.
-            if (newFinal) finalTranscript += newFinal;
+            // TIMPA ULANG SELURUH TEKS, JANGAN MENGGUNAKAN (+=)
+            finalTranscript = newFinal;
             interimTranscript = newInterim;
 
             const fullText = (finalTranscript + ' ' + interimTranscript).trim();
@@ -407,12 +397,9 @@
             }
         };
 
-        recognition.onerror = function() {
-            // Jangan menampilkan error tambahan agar alur aplikasi tetap sederhana.
-        };
+        recognition.onerror = function() {};
 
         recognition.onend = function() {
-            // Tidak melakukan auto-restart. Ini mencegah loop dan penumpukan recognition.
             if (voiceRecognitionAktif === recognition && sesiDihentikan) {
                 voiceRecognitionAktif = null;
             }
@@ -706,24 +693,41 @@
 
     async function eksporSetoranLapangan() {
         if (setoranHariIni.length === 0 && masterKKLokal.length === 0) { Swal.fire('Info', 'Tidak ada data untuk dikirim.', 'info'); return; }
+        
         const dataKirim = { tipe_file: "SETORAN_LAPANGAN_SOSKEM", tanggal_kirim: new Date().toISOString(), data_iuran: setoranHariIni, data_master_update: masterKKLokal };
-        const isiJson = JSON.stringify(dataKirim, null, 2); const fileBlob = new Blob([isiJson], { type: "application/json" });
-        const namaFile = `Laporan_Lapangan_${new Date().toISOString().split('T')[0]}.json`; const fileShare = new File([fileBlob], namaFile, { type: "application/json" });
+        const isiJson = JSON.stringify(dataKirim, null, 2); 
+        const fileBlob = new Blob([isiJson], { type: "application/json" });
+        const namaFile = `Laporan_Lapangan_${new Date().toISOString().split('T')[0]}.json`; 
+        
+        let fileShared = false;
 
-        if (navigator.canShare && navigator.canShare({ files: [fileShare] })) {
-            try {
+        // BUNGKUS DENGAN TRY CATCH untuk mencegah error di browser/WebView yang tidak mendukung object File & Share API
+        try {
+            const fileShare = new File([fileBlob], namaFile, { type: "application/json" });
+            if (navigator.canShare && navigator.canShare({ files: [fileShare] })) {
                 await navigator.share({ title: 'Laporan Setoran & Warga', text: 'Assalamu\'alaikum Admin, ini file laporan dari lapangan.', files: [fileShare] });
                 konfirmasiPembersihanLayar();
-            } catch (error) { console.log('Share dibatalkan'); }
-        } else {
-            let link = document.createElement("a"); link.href = URL.createObjectURL(fileBlob); link.download = namaFile; document.body.appendChild(link); link.click(); document.body.removeChild(link);
-            Swal.fire({ title: 'File Diunduh', text: 'Kirim file yang terdownload ke WA Admin.', icon: 'info', showCancelButton: true, confirmButtonColor: '#25d366', confirmButtonText: '💬 Buka WA Admin', cancelButtonText: 'Tutup' })
-            .then((res) => {
-                if (res.isConfirmed) { window.open(`https://wa.me/${NOMOR_WA_ADMIN}?text=${encodeURIComponent("Assalamu'alaikum Admin, file laporan dari lapangan sudah saya download. Berikut saya lampirkan filenya:")}`, '_blank'); konfirmasiPembersihanLayar(); }
-                else konfirmasiPembersihanLayar();
-            });
+                fileShared = true;
+            }
+        } catch (error) { 
+            console.log('Fungsi Share tidak didukung penuh, beralih ke fallback download...', error); 
+        }
+
+        // FALLBACK: JIKA SHARE GAGAL/DIBATALKAN ATAU TIDAK MENDUKUNG
+        if (!fileShared) {
+            try {
+                let link = document.createElement("a"); link.href = URL.createObjectURL(fileBlob); link.download = namaFile; document.body.appendChild(link); link.click(); document.body.removeChild(link);
+                Swal.fire({ title: 'File Diunduh', text: 'Kirim file yang terdownload ke WA Admin.', icon: 'info', showCancelButton: true, confirmButtonColor: '#25d366', confirmButtonText: '💬 Buka WA Admin', cancelButtonText: 'Tutup' })
+                .then((res) => {
+                    if (res.isConfirmed) { window.open(`https://wa.me/${NOMOR_WA_ADMIN}?text=${encodeURIComponent("Assalamu'alaikum Admin, file laporan dari lapangan sudah saya download. Berikut saya lampirkan filenya:")}`, '_blank'); konfirmasiPembersihanLayar(); }
+                    else konfirmasiPembersihanLayar();
+                });
+            } catch(err) {
+                Swal.fire('Error', 'Gagal memproses file.', 'error');
+            }
         }
     }
+    
     function konfirmasiPembersihanLayar() {
         setTimeout(() => {
             Swal.fire({ title: 'Selesai Dikirim?', text: 'Kosongkan history setoran hari ini untuk besok? (Data warga aman).', icon: 'question', showCancelButton: true, confirmButtonColor: '#059669', confirmButtonText: 'Ya, Kosongkan' })
