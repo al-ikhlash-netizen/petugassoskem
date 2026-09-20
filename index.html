@@ -98,7 +98,7 @@
     <!-- TAB 1: TAGIHAN IURAN -->
     <div id="tab-tagihan" class="tab-content active">
         <div class="sync-panel">
-            <div class="sync-header"><span>🔄 Sinkronisasi Pusat</span><span id="status-master" style="color: #dc2626;">❌ Warga: Kosong</span></div>
+            <div class="sync-header"><span>🔄 Sinkronisasi Pusat (Mode Offline Ready)</span><span id="status-master" style="color: #dc2626;">❌ Warga: Kosong</span></div>
             <div class="btn-group">
                 <button class="btn-sync btn-tarik" onclick="pemicuImporMaster()">📥 1. Tarik Data</button>
                 <button class="btn-sync btn-kirim" onclick="eksporSetoranLapangan()">📤 2. Kirim Laporan</button>
@@ -176,14 +176,14 @@
                     </div>
                 </div>
                 <div class="form-group"><label>Kode Buku (Otomatis)</label><input type="text" id="lokal-kode" class="form-control" readonly style="background:#f1f5f9; font-weight:bold;"></div>
-                <div class="form-group"><label>Nama Kepala Keluarga</label><input type="text" id="lokal-nama" class="form-control" placeholder="Nama..." required></div>
+                <div class="form-group"><label>Nama Kepala Keluarga</label><input type="text" id="lokal-nama" class="form-control" placeholder="Nama..."></div>
                 <div class="form-group">
                     <label>Nomor WhatsApp</label>
                     <input type="text" id="lokal-wa" class="form-control" placeholder="Contoh: 081234...">
                 </div>
                 <div class="form-group">
                     <label>Jumlah Jiwa</label>
-                    <select id="lokal-jiwa" class="form-control" required>
+                    <select id="lokal-jiwa" class="form-control">
                         <option value="">-- Pilih Jumlah Jiwa --</option>
                         <option value="1">1 Jiwa</option>
                         <option value="2">2 Jiwa</option>
@@ -271,7 +271,6 @@
     let setoranHariIni = JSON.parse(localStorage.getItem('soskem_petugas_iuran')) || [];
     let indexEditLokal = null;
 
-    // LOGIKA PENYESUAIAN DATA LAMA (Hapus KK yang terlanjur tersimpan dan jadikan kosong)
     masterKKLokal = masterKKLokal.map(w => {
         let jiwaAman = w.jiwa || "";
         if (!w.jiwa && w.nomor) {
@@ -427,7 +426,7 @@
         
         masterKKLokal.push({ kode, rt, nama, wa, jiwa, rw });
         localStorage.setItem('soskem_petugas_master', JSON.stringify(masterKKLokal));
-        Swal.fire('Berhasil', `Warga baru ditambahkan!<br>Gunakan kode: <b>${kode}</b>`, 'success');
+        Swal.fire('Berhasil', `Warga baru ditambahkan secara offline!<br>Gunakan kode: <b>${kode}</b>`, 'success');
         
         document.getElementById('lokal-nama').value = ''; 
         document.getElementById('lokal-wa').value = ''; 
@@ -558,7 +557,7 @@
         if (sisaDana > 0) { setoranHariIni.push({ tanggal, kode: kodeLengkap, rw: rwInput, periode: "Kompensasi", nominal: sisaDana, signature }); }
 
         localStorage.setItem('soskem_petugas_iuran', JSON.stringify(setoranHariIni));
-        Swal.fire('Sukses', `Setoran Rp ${nominalInput.toLocaleString('id-ID')} tersimpan!`, 'success');
+        Swal.fire('Sukses', `Setoran offline Rp ${nominalInput.toLocaleString('id-ID')} tersimpan!`, 'success');
         document.getElementById('ptg-kode').value = ''; document.getElementById('ptg-nominal').value = 'Rp 25.000'; document.getElementById('preview-kk').innerHTML = ''; bersihkanTandaTangan(); renderLogSetoran();
     });
 
@@ -596,7 +595,7 @@
                     });
 
                     localStorage.setItem('soskem_petugas_master', JSON.stringify(masterKKLokal));
-                    Swal.fire('Sukses', 'Data warga ditarik. Siap keliling!', 'success'); 
+                    Swal.fire('Sukses', 'Data warga ditarik dan disimpan untuk offline. Siap keliling!', 'success'); 
                     perbaruiStatusMaster(); renderListWargaLokal();
                 } else { Swal.fire('Gagal', 'File bukan Backup SOSKEM.', 'error'); }
             } catch (err) { Swal.fire('Error', 'Gagal Membaca File.', 'error'); }
@@ -628,8 +627,8 @@
             document.body.removeChild(link);
             
             Swal.fire({ 
-                title: 'File Diunduh', 
-                text: 'Silakan kirim file JSON yang baru saja terdownload ke WA Admin.', 
+                title: 'File Laporan Dieksport', 
+                text: 'Silakan kirim file JSON ke WA Admin saat ada internet.', 
                 icon: 'info', 
                 showCancelButton: true, 
                 confirmButtonColor: '#25d366', 
@@ -648,7 +647,7 @@
     
     function konfirmasiPembersihanLayar() {
         setTimeout(() => {
-            Swal.fire({ title: 'Selesai Dikirim?', text: 'Kosongkan history setoran hari ini untuk besok? (Data warga aman).', icon: 'question', showCancelButton: true, confirmButtonColor: '#059669', confirmButtonText: 'Ya, Kosongkan' })
+            Swal.fire({ title: 'Selesai Dikirim?', text: 'Kosongkan history setoran hari ini untuk besok? (Data warga offline aman).', icon: 'question', showCancelButton: true, confirmButtonColor: '#059669', confirmButtonText: 'Ya, Kosongkan' })
             .then((res) => { if (res.isConfirmed) { setoranHariIni = []; localStorage.removeItem('soskem_petugas_iuran'); renderLogSetoran(); } });
         }, 1500);
     }
