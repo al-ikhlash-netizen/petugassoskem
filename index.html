@@ -169,17 +169,11 @@
                 <div class="form-group"><label>Nama Kepala Keluarga</label><input type="text" id="lokal-nama" class="form-control" placeholder="Nama..." required></div>
                 <div class="form-group">
                     <label>Nomor WhatsApp</label>
-                    <div style="display: flex; gap: 5px;">
-                        <input type="text" id="lokal-wa" class="form-control" placeholder="Contoh: 081234...">
-                        <button type="button" class="btn-action-sm" style="background: #0284c7; padding: 0 12px;" onclick="mulaiVoiceInput('lokal-wa')" title="Input Suara">🎤 Bicara</button>
-                    </div>
+                    <input type="text" id="lokal-wa" class="form-control" placeholder="Contoh: 081234...">
                 </div>
                 <div class="form-group">
                     <label>No. KK (16 Digit)</label>
-                    <div style="display: flex; gap: 5px;">
-                        <input type="text" id="lokal-kk" class="form-control" placeholder="Bisa disusul jika blm ada..." maxlength="16">
-                        <button type="button" class="btn-action-sm" style="background: #0284c7; padding: 0 12px;" onclick="mulaiVoiceInput('lokal-kk')" title="Input Suara">🎤 Bicara</button>
-                    </div>
+                    <input type="text" id="lokal-kk" class="form-control" placeholder="Bisa disusul jika blm ada..." maxlength="16">
                 </div>
                 <button type="submit" class="btn-native" style="background: var(--primary-dark); padding: 10px; font-size: 12px;">Daftarkan Warga</button>
             </form>
@@ -216,17 +210,11 @@
         <div class="form-group"><label>Nama Kepala Keluarga</label><input type="text" id="modal-inp-nama" class="form-control"></div>
         <div class="form-group">
             <label>Nomor WA</label>
-            <div style="display: flex; gap: 5px;">
-                <input type="text" id="modal-inp-wa" class="form-control">
-                <button type="button" class="btn-action-sm" style="background: #0284c7; padding: 0 10px;" onclick="mulaiVoiceInput('modal-inp-wa')">🎤</button>
-            </div>
+            <input type="text" id="modal-inp-wa" class="form-control">
         </div>
         <div class="form-group">
             <label>No. KK</label>
-            <div style="display: flex; gap: 5px;">
-                <input type="text" id="modal-inp-kk" class="form-control" maxlength="16">
-                <button type="button" class="btn-action-sm" style="background: #0284c7; padding: 0 10px;" onclick="mulaiVoiceInput('modal-inp-kk')">🎤</button>
-            </div>
+            <input type="text" id="modal-inp-kk" class="form-control" maxlength="16">
         </div>
         <div class="modal-footer">
             <button class="btn-action-sm" onclick="tutupModalWarga()" style="background:#cbd5e1; color:#334155;">Batal</button>
@@ -253,158 +241,6 @@
         generateKodeBukuLokal();
         renderListWargaLokal();
     });
-
-    // ============================================================
-    // VOICE INPUT ANGKA - KHUSUS NOMOR WA & NO. KK
-    // ============================================================
-    let voiceRecognitionAktif = null;
-    let voiceSessionId = 0;
-
-    function normalisasiAngkaSuara(text) {
-        if (!text) return '';
-
-        const kamusAngka = {
-            'nol': '0',
-            'kosong': '0',
-            'satu': '1',
-            'dua': '2',
-            'tiga': '3',
-            'empat': '4',
-            'lima': '5',
-            'enam': '6',
-            'tujuh': '7',
-            'delapan': '8',
-            'sembilan': '9'
-        };
-
-        const tokens = text
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/gi, ' ')
-            .trim()
-            .split(/\s+/)
-            .filter(Boolean);
-
-        let hasil = '';
-
-        tokens.forEach(token => {
-            if (kamusAngka[token] !== undefined) {
-                hasil += kamusAngka[token];
-                return;
-            }
-
-            if (/^\d+$/.test(token)) {
-                hasil += token;
-            }
-        });
-
-        return hasil.replace(/\D/g, '');
-    }
-
-    function mulaiVoiceInput(targetId) {
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (!SpeechRecognition) {
-            Swal.fire('Info', 'Fitur suara tidak didukung di browser ini. Gunakan mikrofon pada keyboard HP.', 'info');
-            return;
-        }
-
-        const targetEl = document.getElementById(targetId);
-        if (!targetEl) return;
-
-        if (voiceRecognitionAktif) {
-            try { voiceRecognitionAktif.stop(); } catch (e) {}
-            voiceRecognitionAktif = null;
-        }
-
-        const recognition = new SpeechRecognition();
-        voiceRecognitionAktif = recognition;
-        const sessionId = ++voiceSessionId;
-
-        recognition.lang = 'id-ID';
-        recognition.continuous = true;
-        recognition.interimResults = true;
-        recognition.maxAlternatives = 1;
-
-        let finalTranscript = '';
-        let interimTranscript = '';
-        let sesiDihentikan = false;
-
-        Swal.fire({
-            title: '🎙️ Sedang Mendengarkan...',
-            html: '<p style="font-size:12px; color:#64748b; margin-bottom:10px;">Sebutkan nomor dengan jelas dan santai.<br>Tekan tombol <b>Selesai</b> jika sudah lengkap.</p>' +
-                  '<div id="live-speech-box" style="font-size:16px; font-weight:bold; color:#0f2c23; min-height:45px; max-height:80px; overflow-y:auto; padding:8px; background:#f1f5f9; border-radius:6px; word-break:break-all; border:1px solid #cbd5e1;">Mendengarkan suara Anda...</div>',
-            showCancelButton: true,
-            confirmButtonText: '✅ Selesai',
-            cancelButtonText: 'Batal',
-            confirmButtonColor: '#059669',
-            allowOutsideClick: false,
-            didOpen: () => {
-                if (sessionId !== voiceSessionId) return;
-                try {
-                    recognition.start();
-                } catch (e) {}
-            },
-            preConfirm: () => {
-                sesiDihentikan = true;
-                try { recognition.stop(); } catch (e) {}
-                return finalTranscript + ' ' + interimTranscript;
-            }
-        }).then((result) => {
-            if (voiceRecognitionAktif === recognition) voiceRecognitionAktif = null;
-            if (sessionId !== voiceSessionId) return;
-
-            if (result.isConfirmed) {
-                const rawText = result.value || '';
-                let angkaBersih = normalisasiAngkaSuara(rawText);
-
-                const adalahKK = targetId === 'lokal-kk' || targetId === 'modal-inp-kk';
-                if (adalahKK) {
-                    angkaBersih = angkaBersih.slice(0, 16);
-                }
-
-                if (angkaBersih) {
-                    targetEl.value = angkaBersih;
-                    targetEl.dispatchEvent(new Event('input', { bubbles: true }));
-                } else {
-                    Swal.fire('Perhatian', 'Tidak ada angka yang terdeteksi dari suara Anda.', 'warning');
-                }
-            }
-        });
-
-        recognition.onresult = function(event) {
-            if (sessionId !== voiceSessionId) return;
-
-            let newFinal = '';
-            let newInterim = '';
-
-            // MULAI DARI 0 untuk menimpa ulang seluruh kalimat & mencegah duplikasi angka (menumpuk) di Android Chrome
-            for (let i = 0; i < event.results.length; i++) {
-                const transcript = event.results[i][0].transcript || '';
-                if (event.results[i].isFinal) {
-                    newFinal += transcript + ' ';
-                } else {
-                    newInterim += transcript;
-                }
-            }
-
-            // TIMPA ULANG SELURUH TEKS, JANGAN MENGGUNAKAN (+=)
-            finalTranscript = newFinal;
-            interimTranscript = newInterim;
-
-            const fullText = (finalTranscript + ' ' + interimTranscript).trim();
-            const box = document.getElementById('live-speech-box');
-            if (box) {
-                box.innerText = fullText !== '' ? fullText : 'Mendengarkan...';
-            }
-        };
-
-        recognition.onerror = function() {};
-
-        recognition.onend = function() {
-            if (voiceRecognitionAktif === recognition && sesiDihentikan) {
-                voiceRecognitionAktif = null;
-            }
-        };
-    }
 
     function pindahTabLokal(indexTab, elBtn) {
         const listTabID = ['tab-tagihan', 'tab-warga'];
@@ -691,40 +527,49 @@
         }; reader.readAsText(file); event.target.value = '';
     }
 
+    // FIX: Fungsi Ekspor disederhanakan dengan Download otomatis dan langsung membuka link WhatsApp
     async function eksporSetoranLapangan() {
-        if (setoranHariIni.length === 0 && masterKKLokal.length === 0) { Swal.fire('Info', 'Tidak ada data untuk dikirim.', 'info'); return; }
+        if (setoranHariIni.length === 0 && masterKKLokal.length === 0) { 
+            Swal.fire('Info', 'Tidak ada data untuk dikirim.', 'info'); 
+            return; 
+        }
         
-        const dataKirim = { tipe_file: "SETORAN_LAPANGAN_SOSKEM", tanggal_kirim: new Date().toISOString(), data_iuran: setoranHariIni, data_master_update: masterKKLokal };
+        const dataKirim = { 
+            tipe_file: "SETORAN_LAPANGAN_SOSKEM", 
+            tanggal_kirim: new Date().toISOString(), 
+            data_iuran: setoranHariIni, 
+            data_master_update: masterKKLokal 
+        };
         const isiJson = JSON.stringify(dataKirim, null, 2); 
         const fileBlob = new Blob([isiJson], { type: "application/json" });
         const namaFile = `Laporan_Lapangan_${new Date().toISOString().split('T')[0]}.json`; 
         
-        let fileShared = false;
-
-        // BUNGKUS DENGAN TRY CATCH untuk mencegah error di browser/WebView yang tidak mendukung object File & Share API
         try {
-            const fileShare = new File([fileBlob], namaFile, { type: "application/json" });
-            if (navigator.canShare && navigator.canShare({ files: [fileShare] })) {
-                await navigator.share({ title: 'Laporan Setoran & Warga', text: 'Assalamu\'alaikum Admin, ini file laporan dari lapangan.', files: [fileShare] });
+            // Proses Download File
+            let link = document.createElement("a"); 
+            link.href = URL.createObjectURL(fileBlob); 
+            link.download = namaFile; 
+            document.body.appendChild(link); 
+            link.click(); 
+            document.body.removeChild(link);
+            
+            // Konfirmasi dan Redirect ke WhatsApp
+            Swal.fire({ 
+                title: 'File Diunduh', 
+                text: 'Silakan kirim file JSON yang baru saja terdownload ke WA Admin.', 
+                icon: 'info', 
+                showCancelButton: true, 
+                confirmButtonColor: '#25d366', 
+                confirmButtonText: '💬 Buka WA Admin', 
+                cancelButtonText: 'Tutup' 
+            }).then((res) => {
+                if (res.isConfirmed) { 
+                    window.open(`https://wa.me/${NOMOR_WA_ADMIN}?text=${encodeURIComponent("Assalamu'alaikum Admin, file laporan dari lapangan sudah saya download. Berikut saya lampirkan filenya:")}`, '_blank'); 
+                }
                 konfirmasiPembersihanLayar();
-                fileShared = true;
-            }
-        } catch (error) { 
-            console.log('Fungsi Share tidak didukung penuh, beralih ke fallback download...', error); 
-        }
-
-        // FALLBACK: JIKA SHARE GAGAL/DIBATALKAN ATAU TIDAK MENDUKUNG
-        if (!fileShared) {
-            try {
-                let link = document.createElement("a"); link.href = URL.createObjectURL(fileBlob); link.download = namaFile; document.body.appendChild(link); link.click(); document.body.removeChild(link);
-                Swal.fire({ title: 'File Diunduh', text: 'Kirim file yang terdownload ke WA Admin.', icon: 'info', showCancelButton: true, confirmButtonColor: '#25d366', confirmButtonText: '💬 Buka WA Admin', cancelButtonText: 'Tutup' })
-                .then((res) => {
-                    if (res.isConfirmed) { window.open(`https://wa.me/${NOMOR_WA_ADMIN}?text=${encodeURIComponent("Assalamu'alaikum Admin, file laporan dari lapangan sudah saya download. Berikut saya lampirkan filenya:")}`, '_blank'); konfirmasiPembersihanLayar(); }
-                    else konfirmasiPembersihanLayar();
-                });
-            } catch(err) {
-                Swal.fire('Error', 'Gagal memproses file.', 'error');
-            }
+            });
+        } catch(err) {
+            Swal.fire('Error', 'Gagal memproses file laporan.', 'error');
         }
     }
     
