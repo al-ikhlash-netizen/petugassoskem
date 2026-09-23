@@ -45,23 +45,36 @@
 
         .container { width: 100%; max-width: 600px; margin: 0 auto; padding: 0 15px; margin-top: 15px; }
         .card-native { background: var(--card-bg); border-radius: 14px; padding: 18px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); border: 1px solid var(--border-color); }
+        
+        /* JUDUL CARD FORM UTAMA */
+        .card-title-main { font-size: 14px; color: #ffffff; background: var(--primary-emerald); margin: -18px -18px 15px -18px; padding: 12px 18px; border-radius: 13px 13px 0 0; font-weight: bold; display: flex; align-items: center; gap: 8px; }
+        
         .card-native h3 { font-size: 13px; color: var(--primary-dark); margin-bottom: 12px; font-weight: 700; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; }
 
+        /* HEADER LANGKAH (1, 2, 3) */
+        .step-header { background: #f8fafc; color: var(--primary-dark); padding: 6px 10px; border-radius: 6px; font-size: 12px; font-weight: 800; margin-top: 15px; margin-bottom: 12px; display: flex; align-items: center; border-left: 4px solid var(--accent-gold); box-shadow: 0 1px 2px rgba(0,0,0,0.02); }
+        .step-header:first-of-type { margin-top: 0; }
+
         .form-group { margin-bottom: 12px; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: 700; font-size: 12px; color: #334155; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 700; font-size: 12px; color: #475569; }
         .form-control { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; background: #fff; }
         .form-control:focus { outline: none; border-color: var(--primary-emerald); box-shadow: 0 0 0 3px rgba(19, 78, 56, 0.1); }
         .form-row-prefix { display: flex; gap: 5px; }
         .prefix-addon { background: #e2e8f0; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-weight: bold; color: #334155; font-size: 13px; display: flex; align-items: center; }
 
-        .btn-native { width: 100%; padding: 12px; background: var(--primary-emerald); color: #fff; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 14px; transition: 0.2s; }
+        .btn-native { width: 100%; padding: 12px; background: var(--primary-emerald); color: #fff; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 14px; transition: 0.2s; margin-top: 10px; box-shadow: 0 4px 6px rgba(19,78,56,0.2); }
+        .btn-native:active { transform: translateY(2px); box-shadow: none; }
+        
         .btn-action-sm { padding: 6px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; border: none; color: white; background: #0284c7;}
 
         .signature-box { width: 100%; height: 130px; border: 2px dashed #cbd5e1; border-radius: 8px; background: #fafafa; display: block; touch-action: none; cursor: crosshair; }
+        
+        /* LOG LIST STYLING */
         .log-item { background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px; border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
         .log-info h4 { font-size: 13px; color: var(--primary-dark); margin-bottom: 2px; }
         .log-info p { font-size: 10px; color: #64748b; }
-        .btn-hapus { background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: bold; }
+        
+        .btn-hapus { background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: bold; display: flex; align-items: center; gap: 4px; margin-top: 6px; }
 
         .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: #ffffff; display: flex; border-top: 1px solid var(--border-color); box-shadow: 0 -4px 15px rgba(0,0,0,0.06); z-index: 999; height: 65px; }
         .nav-item { flex: 1; background: none; border: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; cursor: pointer; color: #64748b; font-size: 11px; font-weight: 600; transition: 0.2s; }
@@ -97,20 +110,26 @@
 <div class="container">
     <!-- TAB 1: TAGIHAN IURAN -->
     <div id="tab-tagihan" class="tab-content active">
+        
+        <!-- PANEL SINKRONISASI -->
         <div class="sync-panel">
-            <div class="sync-header"><span>🔄 Sinkronisasi Pusat (Mode Offline Ready)</span><span id="status-master" style="color: #dc2626;">❌ Warga: Kosong</span></div>
+            <div class="sync-header"><span>🔄 Sinkronisasi Pusat (Offline Mode)</span><span id="status-master" style="color: #dc2626;">❌ Warga: Kosong</span></div>
             <div class="btn-group">
-                <button class="btn-sync btn-tarik" onclick="pemicuImporMaster()">📥 1. Tarik Data</button>
-                <button class="btn-sync btn-kirim" onclick="eksporSetoranLapangan()">📤 2. Kirim Laporan</button>
+                <button class="btn-sync btn-tarik" onclick="pemicuImporMaster()">⬇️ 1. Tarik Data</button>
+                <button class="btn-sync btn-kirim" onclick="eksporSetoranLapangan()">⬆️ 2. Kirim Laporan</button>
                 <input type="file" id="input-file-master" accept=".json" style="display: none;" onchange="prosesImporMaster(event)">
             </div>
         </div>
 
+        <!-- FORM UTAMA DENGAN LAYOUT BARU 1-2-3 -->
         <div class="card-native">
-            <h3>💰 Input Setoran Warga</h3>
+            <div class="card-title-main">💰 INPUT SETORAN WARGA</div>
             <form id="form-petugas">
+                
+                <!-- BAGIAN 1 -->
+                <div class="step-header">1️⃣ DATA WARGA</div>
                 <div class="form-group">
-                    <label>Pilih Wilayah (RW)</label>
+                    <label>Wilayah (RW)</label>
                     <select id="ptg-rw" class="form-control" onchange="sinkronisasiPrefixSetoran()" required>
                         <option value="RW 18">RW 18</option><option value="RW 19">RW 19</option><option value="RW 20">RW 20</option>
                     </select>
@@ -121,11 +140,13 @@
                     <div class="form-row-prefix">
                         <span id="label-prefix-setor" class="prefix-addon">ISK18/</span>
                         <input type="text" id="ptg-kode" class="form-control" placeholder="004" required style="text-transform: uppercase;" oninput="cekPreviewKK()">
-                        <button type="button" class="btn-action-sm" style="padding: 0 14px; background-color: var(--primary-dark);" onclick="bukaModalCariKode()">🔍 Cari</button>
+                        <button type="button" class="btn-action-sm" style="padding: 0 14px; background-color: var(--accent-gold); color: #000; font-size: 13px;" onclick="bukaModalCariKode()">🔍 Cari</button>
                     </div>
                     <div id="preview-kk" style="font-size: 11px; margin-top: 4px; font-weight: 600;"></div>
                 </div>
 
+                <!-- BAGIAN 2 -->
+                <div class="step-header">2️⃣ DETAIL PEMBAYARAN</div>
                 <div class="form-group" style="display: flex; gap: 8px;">
                     <div style="flex: 1;"><label>Tanggal</label><input type="date" id="ptg-tanggal" class="form-control" required></div>
                     <div style="flex: 1;"><label>Periode</label>
@@ -136,14 +157,21 @@
                     </div>
                 </div>
 
-                <div class="form-group"><label>Uang Diterima (Rp)</label><input type="text" id="ptg-nominal" class="form-control" value="Rp 25.000" onkeyup="this.value = formatRupiahKetik(this.value, 'Rp ')" required style="font-weight:bold; color:var(--primary-dark); font-size: 16px;"></div>
                 <div class="form-group">
-                    <label>Tanda Tangan Penyetor</label>
+                    <label>Uang Diterima (Rp)</label>
+                    <input type="text" id="ptg-nominal" class="form-control" value="Rp 25.000" onkeyup="this.value = formatRupiahKetik(this.value, 'Rp ')" required style="font-weight:bold; color:var(--primary-dark); font-size: 16px;">
+                </div>
+
+                <!-- BAGIAN 3 -->
+                <div class="step-header">3️⃣ PENGESAHAN</div>
+                <div class="form-group">
+                    <label>Tanda Tangan Penyetor:</label>
                     <canvas id="signatureCanvas" class="signature-box" width="500" height="130"></canvas>
                     <input type="hidden" id="signatureInput" />
-                    <button type="button" onclick="bersihkanTandaTangan()" style="margin-top:6px; padding:6px 10px; font-size:10px; background:#e2e8f0; border:none; border-radius:6px; font-weight:bold; color:#475569;">🧹 Hapus Tanda Tangan</button>
+                    <button type="button" class="btn-hapus" onclick="bersihkanTandaTangan()">🧹 Hapus Tanda Tangan</button>
                 </div>
-                <button type="submit" class="btn-native">💾 Simpan Setoran</button>
+                
+                <button type="submit" class="btn-native">💾 SIMPAN SETORAN</button>
             </form>
         </div>
 
